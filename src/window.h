@@ -8,8 +8,8 @@
 #include <stdbool.h>
 
 typedef struct  {
-    int width;
-    int height;
+    float width;
+    float height;
     const char *name;
     GLFWwindow *window;
 } Context;

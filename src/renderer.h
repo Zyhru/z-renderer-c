@@ -3,6 +3,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <cglm/cglm.h>   /* for inline */
+#include "cglm/cam.h"
+#include "cglm/mat4.h"
+#include "cglm/vec3.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +15,8 @@
 
 // #define MAX_VERTICES 1024
 #define STATUS_LOG_SIZE 512 
-#define DEBUG 0
+
+#define DEBUG 1
 
 typedef struct {
     vec3 pos;

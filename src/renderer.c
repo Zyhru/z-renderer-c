@@ -2,7 +2,7 @@
 #include "util.h"
 
 void clear_color() {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.3f, 0.1f, 0.9f, 1.0f);
 }
 
@@ -99,3 +99,15 @@ void render(Renderer *r) {
 void render_shader(Renderer *r) {
     glUseProgram(r->shader);
 }
+
+
+// TODO: Render Cube
+/*
+* - [x] Setup vertices for the cube
+* - [x] Bind, attach vertices, and configure attribute pointers 
+* - [x] Setup uniform values for the matrices
+* - [x] Configure model matrix
+* - [x] Configure view matrix
+* - [x] Configure projection matrix
+*
+**/
