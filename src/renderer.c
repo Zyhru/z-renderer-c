@@ -70,6 +70,7 @@ void render_add_vertices(Renderer *r, Vertex *vertices, size_t v_count) {
     if(!r->vertices) {
         fprintf(stderr, "ERROR: failed to alloc mem for vertices");
         free(r->vertices);
+        r->vertices = NULL;
         return;
     }
    
@@ -100,6 +101,9 @@ void render_shader(Renderer *r) {
     glUseProgram(r->shader);
 }
 
+void render_free(Vertex *vertices) {
+    free(vertices);
+}
 
 // TODO: Render Cube
 /*

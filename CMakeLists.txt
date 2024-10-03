@@ -44,6 +44,8 @@ add_executable(Z-Renderer
     src/window.c
     src/renderer.c
     src/util.c
+    src/camera.c
+    src/input.c
 )
 
 # Include directories for GLAD and GLFW

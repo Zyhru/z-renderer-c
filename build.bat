@@ -4,5 +4,5 @@ echo "Building project..."
 cd build/
 cmake .
 cmake --build .
-cd Debug/
-Z-Renderer.exe
+Debug\\Z-Renderer.exe
+cd ..

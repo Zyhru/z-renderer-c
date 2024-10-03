@@ -16,7 +16,7 @@
 // #define MAX_VERTICES 1024
 #define STATUS_LOG_SIZE 512 
 
-#define DEBUG 1
+#define DEBUG 0
 
 typedef struct {
     vec3 pos;
@@ -38,3 +38,4 @@ void render_init(Renderer *r);
 void render_add_vertices(Renderer *r, Vertex *vertices, size_t v_count);
 void render_shader(Renderer *r);
 void render(Renderer *r);
+void render_free(Vertex *vertices);
