@@ -3,7 +3,7 @@
 
 void clear_color() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(0.3f, 0.1f, 0.9f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 void render_init(Renderer *r) {
@@ -104,14 +104,3 @@ void render_shader(Renderer *r) {
 void render_free(Vertex *vertices) {
     free(vertices);
 }
-
-// TODO: Render Cube
-/*
-* - [x] Setup vertices for the cube
-* - [x] Bind, attach vertices, and configure attribute pointers 
-* - [x] Setup uniform values for the matrices
-* - [x] Configure model matrix
-* - [x] Configure view matrix
-* - [x] Configure projection matrix
-*
-**/

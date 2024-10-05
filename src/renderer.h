@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #include <cglm/cglm.h>   /* for inline */
 #include "cglm/cam.h"
 #include "cglm/mat4.h"

@@ -2,15 +2,29 @@
 #include "window.h"
 #include "camera.h"
 
-void update(Camera *camera, Input *input, float delta_time) {
+typedef struct {
+    float x;
+    float y;
+    float z;
+} Vector3;
+
+void update(Context *ctx, Camera *camera, Input *input, float delta_time) {
+    
     camera_update(camera, input, delta_time);
+    
+    double xpos, ypos;
+    glfwGetCursorPos(ctx->window, &xpos, &ypos);
+    printf("Cursors Pos: (%f, %f)\n", xpos, ypos);
+    
+    camera_look_around(camera, xpos, ypos);
+
     window_update(input);
 }
 
 
 int main(void) {
     Context *ctx = window_init();
-    Camera *camera = camera_init(90.0f);
+    Camera *camera = camera_init(ctx, 90.0f);
     Input input = {0};
     
     float last_frame = 0.0f;
@@ -88,6 +102,14 @@ int main(void) {
 
     render_add_vertices(&r, cube, sizeof(cube) / sizeof(cube[0]));
     glEnable(GL_DEPTH_TEST);
+
+    Vector3 cube_pos[] = {  
+        {5.0f, 0.0f, -7.0f}, // 0
+        {3.0f, 0.0f, -7.0f}, // 1
+        {1.0f, 0.0f, -7.0f}, // 2
+        {-1.0f, 0.0f, -7.0f},// 3
+        {-3.0f, 0.0f, -7.0f}, // 4
+    };
     
     while(!should_close(ctx) && !window_closed(ctx->window)) {
         float curr_frame = glfwGetTime();
@@ -95,15 +117,13 @@ int main(void) {
         last_frame = curr_frame;
 
         clear_color(); // TODO: pass in custom color
-        update(camera, &input, delta_time);
-        //camera_update_test(camera, ctx, delta_time);
+        update(ctx, camera, &input, delta_time);
        
         /* Matrices Data */
         // projection (perspective)
-        mat4 projection, model;
+        mat4 projection;
         glm_mat4_identity(projection);
         glm_mat4_identity(camera->view);
-        glm_mat4_identity(model);
         
         glm_perspective(glm_rad(camera->fov), (ctx->height / ctx->width), 0.1f, 100.0f, projection); // 0.1f near plane , 100f far plane
         
@@ -111,26 +131,30 @@ int main(void) {
         view_matrix(camera);
        
         // model (object)
-        vec3 move = {0.0f, 0.0f, -4.0f};
-        vec3 axis = {1.0f, 0.3f, 0.5f};
-        float angle = glm_rad(90.0f) * glfwGetTime();  // Speed of rotation
-
-        glm_translate_z(model, -10.0f);
-        glm_rotate(model, angle, axis); 
-        
         render_shader(&r);
         
         int projection_loc = glGetUniformLocation(r.shader, "projection");
-        glUniformMatrix4fv(projection_loc, 1, GL_FALSE, projection[0]);
+        glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float *)projection);
 
         int view_loc       = glGetUniformLocation(r.shader, "view");
-        glUniformMatrix4fv(view_loc, 1, GL_FALSE, camera->view[0]);
-
-        int model_loc      = glGetUniformLocation(r.shader, "model");
-        glUniformMatrix4fv(model_loc, 1, GL_FALSE, model[0]);
-
-        render(&r);
-
+        glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float *)camera->view);
+        
+        vec3 axis = {1.0f, 0.3f, 0.5f};
+        float angle = glm_rad(90.0f) * glfwGetTime();  // Speed of rotation
+        for(int i = 0; i < 5; ++i) {
+            mat4 model;
+            glm_mat4_identity(model);
+            
+            glm_translate_x(model, cube_pos[i].x);
+            glm_translate_y(model, cube_pos[i].y);
+            glm_translate_z(model, cube_pos[i].z);
+            glm_rotate(model, angle, axis); 
+            
+            int model_loc = glGetUniformLocation(r.shader, "model");
+            glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)model);
+            render(&r);
+        }
+        
         poll_events();
         swap_buffers(ctx->window);
     }
@@ -143,6 +167,5 @@ int main(void) {
     ctx = NULL;
     r.vertices = NULL; 
     camera = NULL;
-
     return 0;
 }

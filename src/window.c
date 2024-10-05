@@ -36,7 +36,6 @@ Context* window_init() {
     ctx->name   = "z-renderer";
     ctx->window_status = helper;
 
-
     if(!glfwInit()) {
         fprintf(stderr, "ERROR: failed to initialize GLFW\n");
         return NULL;
@@ -53,6 +52,7 @@ Context* window_init() {
     }
 
     glfwSetFramebufferSizeCallback(ctx->window, framebuffer_size_callback);
+    glfwSetInputMode(ctx->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetKeyCallback(ctx->window, input_callback);
 
     glfwMakeContextCurrent(ctx->window);

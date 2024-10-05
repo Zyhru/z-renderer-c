@@ -12,6 +12,6 @@ void input_callback(GLFWwindow* window, int key, int scancode, int action, int m
 
 void input_update(Input *input, int key, int action) {
     if(key >= 0 && key <= KEY_COUNT) {
-        input->keys[key] = (action == GLFW_PRESS);
+        input->keys[key] = (action == GLFW_PRESS) || (action == GLFW_REPEAT);
     }
 }
