@@ -16,7 +16,7 @@ Camera* camera_init(Context *ctx, float fov) {
     camera->x = -(ctx->width / 2);
     camera->y = -(ctx->height / 2);
 
-    printf("Initial X,Y: (%f, %f)", camera->x, camera->y);
+    printf("Initial X,Y: (%f, %f)\n", camera->x, camera->y);
     
     camera->pos[0] = 0.0f; // x
     camera->pos[1] = 0.0f; // y
@@ -48,21 +48,21 @@ void camera_update(Camera *camera, Input *input, float delta_time) {
         vec3 temp = {0.0f, 0.0f, 0.0f};
         glm_vec3_scale(camera->front, velocity, temp);
         glm_vec3_add(camera->pos, temp, camera->pos);
-        printf("Cam Position (%f, %f, %f)\n", camera->pos[0], camera->pos[1], camera->pos[2]);
+        //printf("Cam Position (%f, %f, %f)\n", camera->pos[0], camera->pos[1], camera->pos[2]);
     }
 
     if(input->keys[GLFW_KEY_S] == GLFW_PRESS) {
         vec3 temp = {0.0f, 0.0f, 0.0f};
         glm_vec3_scale(camera->front, velocity, temp);
         glm_vec3_sub(camera->pos, temp, camera->pos);
-        printf("Cam Position (%f, %f, %f)\n", camera->pos[0], camera->pos[1], camera->pos[2]);
+        //printf("Cam Position (%f, %f, %f)\n", camera->pos[0], camera->pos[1], camera->pos[2]);
     }
 
     if(input->keys[GLFW_KEY_D] == GLFW_PRESS) {
         vec3 right = {0.0f, 0.0f, 0.0f};
         glm_cross(camera->front, camera->up, right);
         glm_normalize(right);
-        printf("(Positive X): %f, %f, %f\n", right[0], right[1], right[2]);
+        //printf("(Positive X): %f, %f, %f\n", right[0], right[1], right[2]);
         
         right[0] *= velocity;
         right[1] *= velocity;
@@ -76,7 +76,7 @@ void camera_update(Camera *camera, Input *input, float delta_time) {
 
     if(input->keys[GLFW_KEY_A] == GLFW_PRESS) {
         vec3 right = {0.0f, 0.0f, 0.0f};
-        printf("(Negative X) Vector: %f, %f, %f\n", right[0], right[1], right[2]);
+        //printf("(Negative X) Vector: %f, %f, %f\n", right[0], right[1], right[2]);
         glm_cross(camera->front, camera->up, right);
         glm_normalize(right);
         

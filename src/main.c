@@ -9,12 +9,11 @@ typedef struct {
 } Vector3;
 
 void update(Context *ctx, Camera *camera, Input *input, float delta_time) {
-    
     camera_update(camera, input, delta_time);
     
     double xpos, ypos;
     glfwGetCursorPos(ctx->window, &xpos, &ypos);
-    printf("Cursors Pos: (%f, %f)\n", xpos, ypos);
+    //printf("Cursors Pos: (%f, %f)\n", xpos, ypos);
     
     camera_look_around(camera, xpos, ypos);
 
@@ -47,55 +46,56 @@ int main(void) {
         {{0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}   // Vertex 3: Position + Color
     };
 
-   Vertex cube[] = {
-        // Front face
-        {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}}, // Bottom-left
-        {{0.5f, -0.5f,  0.5f},  {0.0f, 1.0f, 0.0f}}, // Bottom-right
-        {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}}, // Top-right
-        {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}}, // Top-right
-        {{-0.5f,  0.5f,  0.5f}, {1.0f, 1.0f, 0.0f}}, // Top-left
-        {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}}, // Bottom-left
+    Vertex cube[] = {
+    // Front face
+    {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Bottom-left
+    {{0.5f, -0.5f,  0.5f},  {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}}, // Bottom-right
+    {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}}, // Top-right
+    {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}}, // Top-right
+    {{-0.5f,  0.5f,  0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 1.0f}}, // Top-left
+    {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Bottom-left
 
-        // Back face
-        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}}, // Bottom-left
-        {{0.5f, -0.5f, -0.5f},  {0.0f, 1.0f, 0.0f}}, // Bottom-right
-        {{0.5f,  0.5f, -0.5f},  {0.0f, 0.0f, 1.0f}}, // Top-right
-        {{0.5f,  0.5f, -0.5f},  {0.0f, 0.0f, 1.0f}}, // Top-right
-        {{-0.5f,  0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}}, // Top-left
-        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}}, // Bottom-left
+    // Back face
+    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}}, // Bottom-left
+    {{0.5f, -0.5f, -0.5f},  {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}, // Bottom-right
+    {{0.5f,  0.5f, -0.5f},  {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}, // Top-right
+    {{0.5f,  0.5f, -0.5f},  {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}, // Top-right
+    {{-0.5f,  0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}, {1.0f, 1.0f}}, // Top-left
+    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}}, // Bottom-left
 
-        // Left face
-        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}}, // Bottom-left
-        {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}}, // Top-left
-        {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}}, // Top-right
-        {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}}, // Top-right
-        {{-0.5f, -0.5f,  0.5f}, {1.0f, 1.0f, 0.0f}}, // Bottom-right
-        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}}, // Bottom-left
+    // Left face
+    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}}, // Bottom-left
+    {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}}, // Top-left
+    {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}, // Top-right
+    {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}, // Top-right
+    {{-0.5f, -0.5f,  0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}, // Bottom-right
+    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}}, // Bottom-left
 
-        // Right face
-        {{0.5f, -0.5f, -0.5f},  {1.0f, 0.0f, 0.0f}}, // Bottom-left
-        {{0.5f,  0.5f, -0.5f},  {0.0f, 1.0f, 0.0f}}, // Top-left
-        {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}}, // Top-right
-        {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}}, // Top-right
-        {{0.5f, -0.5f,  0.5f},  {1.0f, 1.0f, 0.0f}}, // Bottom-right
-        {{0.5f, -0.5f, -0.5f},  {1.0f, 0.0f, 0.0f}}, // Bottom-left
+    // Right face
+    {{0.5f, -0.5f, -0.5f},  {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Bottom-left
+    {{0.5f,  0.5f, -0.5f},  {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}}, // Top-left
+    {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}}, // Top-right
+    {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}}, // Top-right
+    {{0.5f, -0.5f,  0.5f},  {1.0f, 1.0f, 0.0f}, {1.0f, 0.0f}}, // Bottom-right
+    {{0.5f, -0.5f, -0.5f},  {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Bottom-left
 
-        // Top face
-        {{-0.5f,  0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}}, // Bottom-left
-        {{0.5f,  0.5f, -0.5f},  {0.0f, 1.0f, 0.0f}}, // Bottom-right
-        {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}}, // Top-right
-        {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}}, // Top-right
-        {{-0.5f,  0.5f,  0.5f}, {1.0f, 1.0f, 0.0f}}, // Top-left
-        {{-0.5f,  0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}}, // Bottom-left
+    // Top face
+    {{-0.5f,  0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // Bottom-left
+    {{0.5f,  0.5f, -0.5f},  {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}}, // Bottom-right
+    {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}, // Top-right
+    {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}, // Top-right
+    {{-0.5f,  0.5f,  0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}, // Top-left
+    {{-0.5f,  0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // Bottom-left
 
-        // Bottom face
-        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}}, // Bottom-left
-        {{0.5f, -0.5f, -0.5f},  {0.0f, 1.0f, 0.0f}}, // Bottom-right
-        {{0.5f, -0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}}, // Top-right
-        {{0.5f, -0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}}, // Top-right
-        {{-0.5f, -0.5f,  0.5f}, {1.0f, 1.0f, 0.0f}}, // Top-left
-        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}}, // Bottom-left
-    };
+    // Bottom face
+    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}}, // Bottom-left
+    {{0.5f, -0.5f, -0.5f},  {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}}, // Bottom-right
+    {{0.5f, -0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}}, // Top-right
+    {{0.5f, -0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}}, // Top-right
+    {{-0.5f, -0.5f,  0.5f}, {1.0f, 1.0f, 0.0f}, {1.0f, 0.0f}}, // Top-left
+    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}}  // Bottom-left
+};
+
  
     //size_t v_count = sizeof(triangle) / sizeof(triangle[0]);
     //render_add_vertices(&r, triangle, v_count);
@@ -104,11 +104,11 @@ int main(void) {
     glEnable(GL_DEPTH_TEST);
 
     Vector3 cube_pos[] = {  
-        {5.0f, 0.0f, -7.0f}, // 0
-        {3.0f, 0.0f, -7.0f}, // 1
-        {1.0f, 0.0f, -7.0f}, // 2
-        {-1.0f, 0.0f, -7.0f},// 3
-        {-3.0f, 0.0f, -7.0f}, // 4
+        {5.0f, 0.0f, -7.0f},
+        {3.0f, 0.0f, -7.0f},
+        {1.0f, 0.0f, -7.0f},
+        {-1.0f, 0.0f, -7.0f},
+        {-3.0f, 0.0f, -7.0f},
     };
     
     while(!should_close(ctx) && !window_closed(ctx->window)) {
@@ -120,7 +120,6 @@ int main(void) {
         update(ctx, camera, &input, delta_time);
        
         /* Matrices Data */
-        // projection (perspective)
         mat4 projection;
         glm_mat4_identity(projection);
         glm_mat4_identity(camera->view);
@@ -129,7 +128,7 @@ int main(void) {
         
         // view (camera)
         view_matrix(camera);
-       
+
         // model (object)
         render_shader(&r);
         

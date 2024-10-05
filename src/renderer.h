@@ -12,9 +12,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 
-// TODO: install stb_image.h
 
-// #define MAX_VERTICES 1024
 #define STATUS_LOG_SIZE 512 
 
 #define DEBUG 0
@@ -22,12 +20,22 @@
 typedef struct {
     vec3 pos;
     vec3 color;
+    vec2 uv;
 } Vertex;
+
+typedef struct {
+    unsigned char *image_data;
+    int x;
+    int y;
+    int channels;
+    GLenum format;
+} Texture;
 
 typedef struct {
     unsigned int vao;
     unsigned int vbo;
     unsigned int shader;
+    unsigned int texture_id;
 
     Vertex *vertices;
     size_t vertices_count;
@@ -40,3 +48,4 @@ void render_add_vertices(Renderer *r, Vertex *vertices, size_t v_count);
 void render_shader(Renderer *r);
 void render(Renderer *r);
 void render_free(Vertex *vertices);
+Texture load_image(const char *file_name);
