@@ -2,29 +2,19 @@
 #include "window.h"
 #include "camera.h"
 
-typedef struct {
-    float x;
-    float y;
-    float z;
-} Vector3;
-
 void update(Context *ctx, Camera *camera, Input *input, float delta_time) {
-    camera_update(camera, input, delta_time);
-    
     double xpos, ypos;
     glfwGetCursorPos(ctx->window, &xpos, &ypos);
-    //printf("Cursors Pos: (%f, %f)\n", xpos, ypos);
     
+    camera_update(camera, input, delta_time);
     camera_look_around(camera, xpos, ypos);
-
     window_update(input);
 }
 
-
-int main(void) {
+int main(int argc, char **argv) {
+    Input input = {0};
     Context *ctx = window_init();
     Camera *camera = camera_init(ctx, 90.0f);
-    Input input = {0};
     
     float last_frame = 0.0f;
     float delta_time = 0.0f;
@@ -39,69 +29,7 @@ int main(void) {
 
     Renderer r;
     render_init(&r);
-
-    Vertex triangle[] = {
-        {{0.0f,  0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},  // Vertex 1: Position + Color
-        {{-0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}}, // Vertex 2: Position + Color
-        {{0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}   // Vertex 3: Position + Color
-    };
-
-    Vertex cube[] = {
-    // Front face
-    {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Bottom-left
-    {{0.5f, -0.5f,  0.5f},  {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}}, // Bottom-right
-    {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}}, // Top-right
-    {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}}, // Top-right
-    {{-0.5f,  0.5f,  0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 1.0f}}, // Top-left
-    {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Bottom-left
-
-    // Back face
-    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}}, // Bottom-left
-    {{0.5f, -0.5f, -0.5f},  {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}, // Bottom-right
-    {{0.5f,  0.5f, -0.5f},  {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}, // Top-right
-    {{0.5f,  0.5f, -0.5f},  {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}, // Top-right
-    {{-0.5f,  0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}, {1.0f, 1.0f}}, // Top-left
-    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}}, // Bottom-left
-
-    // Left face
-    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}}, // Bottom-left
-    {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}}, // Top-left
-    {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}, // Top-right
-    {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}, // Top-right
-    {{-0.5f, -0.5f,  0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}, // Bottom-right
-    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}}, // Bottom-left
-
-    // Right face
-    {{0.5f, -0.5f, -0.5f},  {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Bottom-left
-    {{0.5f,  0.5f, -0.5f},  {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}}, // Top-left
-    {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}}, // Top-right
-    {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}}, // Top-right
-    {{0.5f, -0.5f,  0.5f},  {1.0f, 1.0f, 0.0f}, {1.0f, 0.0f}}, // Bottom-right
-    {{0.5f, -0.5f, -0.5f},  {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Bottom-left
-
-    // Top face
-    {{-0.5f,  0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // Bottom-left
-    {{0.5f,  0.5f, -0.5f},  {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}}, // Bottom-right
-    {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}, // Top-right
-    {{0.5f,  0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}, // Top-right
-    {{-0.5f,  0.5f,  0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}, // Top-left
-    {{-0.5f,  0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // Bottom-left
-
-    // Bottom face
-    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}}, // Bottom-left
-    {{0.5f, -0.5f, -0.5f},  {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}}, // Bottom-right
-    {{0.5f, -0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}}, // Top-right
-    {{0.5f, -0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}}, // Top-right
-    {{-0.5f, -0.5f,  0.5f}, {1.0f, 1.0f, 0.0f}, {1.0f, 0.0f}}, // Top-left
-    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}}  // Bottom-left
-};
-
- 
-    //size_t v_count = sizeof(triangle) / sizeof(triangle[0]);
-    //render_add_vertices(&r, triangle, v_count);
-
-    render_add_vertices(&r, cube, sizeof(cube) / sizeof(cube[0]));
-    glEnable(GL_DEPTH_TEST);
+    render_init_shapes(&r);
 
     Vector3 cube_pos[] = {  
         {5.0f, 0.0f, -7.0f},
@@ -110,7 +38,9 @@ int main(void) {
         {-1.0f, 0.0f, -7.0f},
         {-3.0f, 0.0f, -7.0f},
     };
-    
+
+    glEnable(GL_DEPTH_TEST);
+
     while(!should_close(ctx) && !window_closed(ctx->window)) {
         float curr_frame = glfwGetTime();
         delta_time = curr_frame - last_frame;
@@ -129,7 +59,6 @@ int main(void) {
         // view (camera)
         view_matrix(camera);
 
-        // model (object)
         render_shader(&r);
         
         int projection_loc = glGetUniformLocation(r.shader, "projection");
@@ -141,6 +70,7 @@ int main(void) {
         vec3 axis = {1.0f, 0.3f, 0.5f};
         float angle = glm_rad(90.0f) * glfwGetTime();  // Speed of rotation
         for(int i = 0; i < 5; ++i) {
+            // model (object)
             mat4 model;
             glm_mat4_identity(model);
             
@@ -151,20 +81,27 @@ int main(void) {
             
             int model_loc = glGetUniformLocation(r.shader, "model");
             glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)model);
-            render(&r);
+            render_cube(&r);
         }
-        
+
+        /* Triangle */
+        mat4 model_triangle;
+        vec3 pos = {0.0f, 0.0f, -3.0f};
+        glm_mat4_identity(model_triangle);
+        glm_translate(model_triangle, pos);
+        int model_loc = glGetUniformLocation(r.shader, "model");
+        glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)model_triangle);
+        render_triangle(&r);
+
         poll_events();
         swap_buffers(ctx->window);
     }
     
-    puts("Free'd the heap");
     window_free(ctx);
     camera_free(camera);
-    render_free(r.vertices);
     
     ctx = NULL;
-    r.vertices = NULL; 
     camera = NULL;
+    puts("Free'd the heap");
     return 0;
 }

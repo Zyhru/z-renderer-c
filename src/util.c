@@ -1,5 +1,7 @@
 #include "util.h"
 
+//Paths path = {0};
+
 char* read_file(const char* path) {
     FILE *fp = fopen(path, "rb");
     if(!fp) {
