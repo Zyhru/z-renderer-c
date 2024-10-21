@@ -1,19 +1,5 @@
 #include "model.h"
 
-FaceElements init_face_list() {
-    FaceElements faces;
-    faces.capacity = 50;
-    faces.size = 0;
-    faces.data = malloc(sizeof(uint32_t) * faces.capacity);
-    if(!faces.data) {
-        fprintf(stderr, "ERROR: Failed allocate memory for {FaceList}\n");
-        free(faces.data);
-        exit(EXIT_FAILURE);
-    }
-
-    return faces;
-}
-
 Mesh* MeshAlloc() {
     Mesh *m = z_malloc(sizeof(Mesh), "Mesh");
     if(!m) {
@@ -68,24 +54,23 @@ IndexBuffer* init_indices() {
     return indices;
 }
 
-VertexBuffer init_vbo_list() {
-    VertexBuffer vbo;
-    vbo.capacity = LIST_CAPACITY;
-    vbo.size = 0;
-    vbo.data = malloc(sizeof(OBJVertex) * vbo.capacity); // 600 bytes
-    if(!vbo.data) {
-        fprintf(stderr, "ERROR: Failed allocate memory for {VertexBuffer}\n");
-        free(vbo.data);
-        vbo.data = NULL;
+FaceElements init_faces() {
+    FaceElements faces;
+    faces.capacity = LIST_CAPACITY;
+    faces.size = 0;
+    faces.data = malloc(sizeof(uint32_t) * faces.capacity);
+    if(!faces.data) {
+        fprintf(stderr, "ERROR: Failed allocate memory for {FaceList}\n");
+        free(faces.data);
         exit(EXIT_FAILURE);
     }
 
-    return vbo;
+    return faces;
 }
 
 Vector3List init_vec3_list() {
     Vector3List list;
-    list.capacity = 50;  // TODO: change this
+    list.capacity = LIST_CAPACITY;      
     list.size = 0;
     list.data = malloc(sizeof(Vector3) * list.capacity);
     if(!list.data) {
@@ -99,7 +84,7 @@ Vector3List init_vec3_list() {
 
 Vector2List init_vec2_list() {
     Vector2List list;
-    list.capacity = 50;    
+    list.capacity = LIST_CAPACITY;    
     list.size = 0;
     list.data = malloc(sizeof(Vector2) * list.capacity);
     if(!list.data) {
@@ -109,21 +94,6 @@ Vector2List init_vec2_list() {
     }
 
     return list;
-}
-
-IndexBuffer init_ib_list() {
-    IndexBuffer ib;
-    ib.capacity = 50;    
-    ib.size = 0;
-    ib.data = malloc(sizeof(unsigned int) * ib.capacity);
-    if(!ib.data) {
-        fprintf(stderr, "ERROR: Failed allocate memory for {IndexBuffer}\n");
-        free(ib.data);
-        ib.data = NULL;
-        exit(EXIT_FAILURE);
-    }
-    
-    return ib;
 }
 
 Vector2 create_vec2(float x, float y) {
@@ -141,6 +111,7 @@ Vector3 create_vec3(float x, float y, float z) {
     return v3;
 }
 
+// TODO: Test with textures
 OBJVertex create_vertex(Vector3 pos, Vector2 uv) {
     OBJVertex ov;
     ov.v = pos;
@@ -172,28 +143,33 @@ void split(char **array, char *line, const char *delim) {
         token = strtok_s(NULL, delim, &context);
         ++i;
     }
+
 }
 
-void free_list(void *list) {
-    free(list);
-}
-
+// 10/21/2024: Issue fixed on freeing memory allocating for temp_pos. I was only using 4 bytes of memory allocation per string.
+// TODO: Change memory allocation from heap to stack, since I know how much memory I need.
 void destroy(char **s, char **t) {
     for(int i = 0; i < VERTEX_SIZE; ++i) {
-        free(&s[i]);
+        if(s[i]) {
+            free(s[i]);
+            s[i] = NULL;
+        }
     }
 
     for(int i = 0; i < TEXTURE_SIZE; ++i) {
-        free(&t[i]);
+        if(s[i]) {
+            free(t[i]);
+            s[i] = NULL;
+        }
     }
 }
 
 
 // Supporting one mesh for now
+// WARNING: z_malloc
+// 10/20/2024 : z_malloc was giving us our heap issues. Mistake: malloc(sizeof(size)) instead of malloc(size); (bruh)
 Mesh* import_model(const char *file) {
     puts("Importing model.");
-
-    // WARNING: z_malloc 
     Mesh *mesh = MeshAlloc();
     VertexBuffer *vertices = init_vertices();
     IndexBuffer *indices = init_indices(); 
@@ -213,20 +189,19 @@ Mesh* import_model(const char *file) {
         exit(EXIT_FAILURE);
     }
 
+    // BUG: 10/21/2024 Fixed freeing issue. Check todo.md
     for(int i = 0; i < VERTEX_SIZE; ++i) {
-        temp_pos[i] = malloc(sizeof(char) * 4);
+        temp_pos[i] = malloc(sizeof(char) * VERTICES_CAPACITY);
         if(!temp_pos[i]) {
             fprintf(stderr, "ERROR: Cannot allocate memory for temp_pos");
-            free(temp_pos[i]);
             exit(EXIT_FAILURE);
         }
     }
 
     for(int i = 0; i < TEXTURE_SIZE; ++i) {
-            temp_tex[i] = malloc(sizeof(char) * 30);
+            temp_tex[i] = malloc(sizeof(char) * VERTICES_CAPACITY);
             if(!temp_tex[i]) {
-                fprintf(stderr, "ERROR: Cannot allocate memory for temp_pos");
-                free(temp_tex[i]);
+                fprintf(stderr, "%s", "ERROR: Cannot allocate memory for temp_tex\n");
                 exit(EXIT_FAILURE);
             }
     }
@@ -249,13 +224,11 @@ Mesh* import_model(const char *file) {
         }
        
         if(line[0] == 'f') {
-            //printf("Length of face: %zu\n", strlen(line));
-            FaceElements faces = init_face_list();
+            FaceElements faces = init_faces();
             for(int i = 2; i < strlen(line) - 2; ++i) {
                 if(line[i] != ' ') {
                     int data = line[i] - '0';
                     z_append(faces, data);
-                    //printf("Element %d\n", data);
                 }
             }
             
@@ -289,19 +262,27 @@ Mesh* import_model(const char *file) {
    
     mesh->vertices = vertices;
     mesh->indices = indices;
-   
-    //destroy(temp_pos, temp_tex); // TODO: Keep testing for later
+  
     fclose(fp);
+    destroy(temp_pos, temp_tex);     
     free(pos.data);
     free(tex.data);
     puts("Finished importing model.");
     return mesh;
 }
 
-// TODO: Figure out why freeing the model gives me a heap error
 void model_free(Mesh *model) {
     if (model) {
+        free(model->vertices);
+        free(model->indices);
 		free(model);
         model = NULL;
     }
 }
+
+
+/*
+C:\Users\zyhru\graphics\src\model.c(188,9): warning C4133: 'function': incompatible types - from 'FILE *' to 'const char *const ' [C:\Users\zyhru\graphics\build\Z-Renderer.vcxproj]
+C:\Users\zyhru\graphics\src\model.c(197,13): warning C4133: 'function': incompatible types - from 'FILE *' to 'const char *const ' [C:\Users\zyhru\graphics\build\Z-Renderer.vcxproj]
+C:\Users\zyhru\graphics\src\model.c(205,17): warning C4133: 'function': incompatible types - from 'FILE *' to 'const char *const ' [C:\Users\z
+*/

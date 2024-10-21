@@ -6,14 +6,9 @@
 
 #define LINE_BUF_SIZE 256
 #define LIST_CAPACITY 50
+#define VERTICES_CAPACITY 30
 #define VERTEX_SIZE 4
 #define TEXTURE_SIZE 3
-
-// WARNING: Setting realloc to the same pointer = allocated mem will be lost
-// Corrupted data?
-//
-// l.data = realloc(l.data, sizeof(*l.data) * l.capacity);\
-// l->data = realloc(l->data, sizeof(*l->data) * l->capacity);\
 
 #define z_append_ptr(l, i)\
     do {\
@@ -90,11 +85,10 @@ typedef struct {
 } Mesh;
 
 Mesh* import_model(const char* file);
+Mesh* MeshAlloc();
 VertexBuffer* init_vertices();
 IndexBuffer* init_indices();
-VertexBuffer init_vbo_list();
-IndexBuffer  init_indices_list();
-FaceElements init_face_list();
+FaceElements init_faces();
 Vector3List      init_vec3_list();
 Vector2List      init_vec2_list();
 Vector2 create_vec2(float x, float y);
@@ -102,6 +96,5 @@ Vector3 create_vec3(float x, float y, float z);
 OBJVertex create_vertex(Vector3 pos, Vector2 uv);
 bool is_in_vbo(VertexBuffer *vbo, OBJVertex data);
 void split(char **array, char *line, const char *delim);
-void free_list(void *list);
 void model_free(Mesh *mesh);
 void destroy(char *s[], char *t[]);

@@ -3,7 +3,7 @@
 - [x] Implement camera look around based on the mouse position
 - [x] Textures 
 - [x] Refactor to make creating a shader dynamic
-- [ ] 3D Model Loading (.obj) (partially done)
+- [ ] 3D Model Loading (.obj) (more than partially done)
 - [ ] Custom color struct to pass easily change the window color
 - [ ] Font rendering (to add FPS)
 - [ ] create a macro for init_T_list
@@ -24,11 +24,17 @@ sizeof(size) is always going to return the size of the **size_t size** parameter
 - set up texture sampler2D uniform var
 - activate the texture when rendering
 
+## 10/21/24 TODO: 
+- [x] Continue reading Ryan Fleurys article on Arena Allocators 
+- [x] Debug destroy function (within model.c) (free issues) (fixed 10/21/24)
+- [ ] Test our obj parser on more complex objects
+- [ ] Begin testing parsing vt (vertices for textures (uv's)) for our final model (gravestone)
+
 ## 10/20/24 TODO: 
-- [ ] Read Ryan Fluerys article on Arena Allocator (https://www.rfleury.com/p/untangling-lifetimes-the-arena-allocator)
+- [-] Read Ryan Fluerys article on Arena Allocator (https://www.rfleury.com/p/untangling-lifetimes-the-arena-allocator) (read a little bit)
 - [x] Keep on debugging -> freeing model issue.
 - [ ] Implement an arena allocator to migrate to main prod code for the renderer
-- [ ] Push updated code
+- [x] Push updated code
 
 ## 10/19/24 TODO: 
 - [ ] Figure out why freeing the model gives me a heap error
@@ -52,12 +58,6 @@ sizeof(size) is always going to return the size of the **size_t size** parameter
 - [x] Migrate my test 3D importer to main production 
 - [x] Shader function to create different shader id's
 
-## ISSUES Ran Into
-- When using extern Paths path, you must use the same name. I was using
-Paths paths (in renderer.c oops..) which != Paths path
-
-- Had some trouble passing the Mesh data back locally. Involves heap allocation and that crazy magic. Need to look into macros with
-dynamic memory allocation
 
 ## Importer TODO
 - [x] Read each line, revise and test (almost done)
@@ -67,6 +67,18 @@ dynamic memory allocation
 - [x] parse textures
 - [ ] parse normals (save for later, once I feel like adding lighting)
 - Apply testing code into main production code
+
+## Issues 
+- When using extern Paths path, you must use the same name. I was using
+Paths paths (in renderer.c oops..) which != Paths path
+
+- Had some trouble passing the Mesh data back locally. Involves heap allocation and that crazy magic. Need to look into macros with
+dynamic memory allocation
+
+- Finally got over the heap allocation hump that involved import_model (Mesh *). I created a custom malloc function and the internals was incorrect,
+see WARNING code above import_model
+
+- Fixed: Destroy function was having issues with freeing my temp arrays for parsing the v and vt. I was allocating only 4 bytes for each v position. (To small)
 
 ## Notes:
 - When doing any type of Vector Math, the result will always be a new vector.

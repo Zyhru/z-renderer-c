@@ -14,7 +14,7 @@ void update(Context *ctx, Camera *camera, Input *input, float delta_time) {
 }
 
 int main(int argc, char **argv) {
-    puts("z-renderer v.0.0.2");
+    puts("z-renderer v.0.1.2");
     float last_frame = 0.0f;
     float delta_time = 0.0f;
     Input input = {0};
