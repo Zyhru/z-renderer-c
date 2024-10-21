@@ -2,6 +2,8 @@
 #include "window.h"
 #include "camera.h"
 
+#define TESTING 0
+
 void update(Context *ctx, Camera *camera, Input *input, float delta_time) {
     double xpos, ypos;
     glfwGetCursorPos(ctx->window, &xpos, &ypos);
@@ -12,24 +14,52 @@ void update(Context *ctx, Camera *camera, Input *input, float delta_time) {
 }
 
 int main(int argc, char **argv) {
-    Input input = {0};
-    Context *ctx = window_init();
-    Camera *camera = camera_init(ctx, 90.0f);
-    
+    puts("z-renderer v.0.0.2");
     float last_frame = 0.0f;
     float delta_time = 0.0f;
+    Input input = {0};
+    Renderer r;
     
-    if(!ctx || !camera) {
-        camera = NULL;
+    Context *ctx = window_init();
+    if(!ctx) {
         ctx = NULL;
-        exit(EXIT_FAILURE);
+        return 1;
+    }
+
+    Camera *camera = camera_init(ctx, 90.0f);
+    if(!camera) {
+        camera = NULL;
+        return 1;
     }
     
     context_register_callbacks(ctx, &input);
 
-    Renderer r;
     render_init(&r);
     render_init_shapes(&r);
+    
+    Mesh* model = import_model("C:\\Users\\zyhru\\graphics\\models\\test.obj");
+    if(!model->vertices) {
+        Warning("%s\n", "Model vertices is null");
+        return 1;
+    }
+    
+    if(!model->indices) {
+        Warning("%s\n", "Model vertices is null");
+        return 1;
+    }
+    
+#if TESTING
+        printf("Mode: Testing\n");
+        for(int i = 0; i < model->vertices->size; ++i) {
+            printf("{%f, %f, %f}\n", 
+                   model->vertices->data[i].v.x, 
+                   model->vertices->data[i].v.y,
+                   model->vertices->data[i].v.z);
+        }
+
+        for(int i = 0; i < model->indices->size; ++i) {
+            printf("%u \n", model->indices->data[i]);
+        }
 
     Vector3 cube_pos[] = {  
         {5.0f, 0.0f, -7.0f},
@@ -38,7 +68,10 @@ int main(int argc, char **argv) {
         {-1.0f, 0.0f, -7.0f},
         {-3.0f, 0.0f, -7.0f},
     };
+#endif
 
+
+    render_init_model(model);
     glEnable(GL_DEPTH_TEST);
 
     while(!should_close(ctx) && !window_closed(ctx->window)) {
@@ -49,14 +82,13 @@ int main(int argc, char **argv) {
         clear_color(); // TODO: pass in custom color
         update(ctx, camera, &input, delta_time);
        
-        /* Matrices Data */
         mat4 projection;
         glm_mat4_identity(projection);
         glm_mat4_identity(camera->view);
         
         glm_perspective(glm_rad(camera->fov), (ctx->height / ctx->width), 0.1f, 100.0f, projection); // 0.1f near plane , 100f far plane
         
-        // view (camera)
+        /* Camera */
         view_matrix(camera);
 
         render_shader(&r);
@@ -66,42 +98,78 @@ int main(int argc, char **argv) {
 
         int view_loc       = glGetUniformLocation(r.shader, "view");
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float *)camera->view);
-        
+       
+        int model_loc = glGetUniformLocation(r.shader, "model");
+#if 0
+		/* Cube */
         vec3 axis = {1.0f, 0.3f, 0.5f};
         float angle = glm_rad(90.0f) * glfwGetTime();  // Speed of rotation
         for(int i = 0; i < 5; ++i) {
-            // model (object)
-            mat4 model;
-            glm_mat4_identity(model);
+            mat4 model_cube;
+            glm_mat4_identity(model_cube);
             
-            glm_translate_x(model, cube_pos[i].x);
-            glm_translate_y(model, cube_pos[i].y);
-            glm_translate_z(model, cube_pos[i].z);
-            glm_rotate(model, angle, axis); 
+            glm_translate_x(model_cube, cube_pos[i].x);
+            glm_translate_y(model_cube, cube_pos[i].y);
+            glm_translate_z(model_cube, cube_pos[i].z);
+            glm_rotate(model_cube, angle, axis); 
             
             int model_loc = glGetUniformLocation(r.shader, "model");
-            glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)model);
+            glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)model_cube);
             render_cube(&r);
         }
+#endif
 
-        /* Triangle */
-        mat4 model_triangle;
+        /* Single Cube 
+		   *  Obviously 3D
+		   *  Minimizing by rendering a single cube to limit my FPS
+        */ 
+        vec3 axis = {1.0f, 0.3f, 0.5f};
+        vec3 cube_position = {0.0f, 0.0f, -5.0f};
+        float angle = glm_rad(90.0f) * glfwGetTime();  // Speed of rotation
+        mat4 cube;
+        glm_mat4_identity(cube);
+        glm_translate(cube, cube_position);
+        glm_rotate(cube, angle, axis);
+
+        glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)cube);
+        render_cube(&r);
+
+        /* 2D Triangle */
+        mat4 triangle;
         vec3 pos = {0.0f, 0.0f, -3.0f};
-        glm_mat4_identity(model_triangle);
-        glm_translate(model_triangle, pos);
-        int model_loc = glGetUniformLocation(r.shader, "model");
-        glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)model_triangle);
+        glm_mat4_identity(triangle);
+        glm_translate(triangle, pos);
+        model_loc = glGetUniformLocation(r.shader, "model");
+        glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)triangle);
         render_triangle(&r);
 
+        /* Model */
+        #if 1
+        render_shader_dynamic(model->shader);
+        vec3 obj_pos = {0.0f, 0.0f, -7.0f};
+        mat4 model_cube;
+        glm_mat4_identity(model_cube);
+        glm_translate(model_cube, obj_pos);
+
+        projection_loc = glGetUniformLocation(model->shader, "projection");
+        glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float *)projection);
+
+        view_loc = glGetUniformLocation(model->shader, "view");
+        glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float *)camera->view);
+
+        model_loc = glGetUniformLocation(model->shader, "model");
+        glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)model_cube);
+
+        render_model(model);
+        #endif
+        
         poll_events();
         swap_buffers(ctx->window);
     }
-    
+   
     window_free(ctx);
     camera_free(camera);
-    
-    ctx = NULL;
-    camera = NULL;
-    puts("Free'd the heap");
+    model_free(model);
+    puts("Shutting down renderer.");
     return 0;
 }

@@ -40,6 +40,7 @@ void view_matrix(Camera *cam) {
 
 void camera_free(Camera *cam) {
     free(cam);
+    cam = NULL;
 }
 
 void camera_update(Camera *camera, Input *input, float delta_time) {

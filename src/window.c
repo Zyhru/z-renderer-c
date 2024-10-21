@@ -86,8 +86,9 @@ void poll_events() {
 }
 
 void window_free(Context* ctx) {
-    free(ctx);
     glfwDestroyWindow(ctx->window);
+    ctx->window = NULL;
+    free(ctx);
     glfwTerminate();
 }
 

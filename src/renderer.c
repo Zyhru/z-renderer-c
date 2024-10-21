@@ -4,11 +4,12 @@
 #include "../include/stb_image.h"
 
 Paths path = {
-    .vertex_path = "C:\\Users\\zyhru\\graphics\\vertex.vert",
-    .fragment_path = "C:\\Users\\zyhru\\graphics\\fragment.frag",
+    .vertex_path =
+        "C:\\Users\\zyhru\\graphics\\shaders\\vertex.vert",
+    .fragment_path = "C:\\Users\\zyhru\\graphics\\shaders\\fragment.frag",
     .texture =  {
-        "C:\\Users\\zyhru\\graphics\\minecraft_grass.jpg",
-        "C:\\Users\\zyhru\\graphics\\wall.jpg",
+        "C:\\Users\\zyhru\\graphics\\assets\\minecraft_grass.jpg",
+        "C:\\Users\\zyhru\\graphics\\assets\\wall.jpg",
     }
 };
 
@@ -22,61 +23,20 @@ void render_init(Renderer *r) {
         {
             .vertices = NULL,
             .vertices_count = 0,
+            .shape = CUBE,
 
         },
         {
             .vertices = NULL,
             .vertices_count = 0,
+            .shape = TRIANGLE
         },
         
     };
     
-    memcpy(r->shapes, shapes, sizeof(Primitive));
+    memcpy(r->shapes, shapes, sizeof(shapes));
 
-    puts("Reading shader files.");
-    const char *vertex_glsl = read_file(path.vertex_path);
-    const char *fragment_glsl = read_file(path.fragment_path);
-
-    if(!vertex_glsl || !fragment_glsl) {
-        fprintf(stderr, "ERROR: Could not read shaders");
-    }
-
-    puts("Compiling vertex shader.");
-    unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_shader, 1, &vertex_glsl, NULL);
-    glCompileShader(vertex_shader);
-
-    int status;
-    char status_log[STATUS_LOG_SIZE];
-    glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &status);
-    if(!status) {
-        glGetShaderInfoLog(vertex_shader, sizeof(status_log), NULL, status_log);
-        fprintf(stderr, "ERROR: Vertex Shader Compilation: %s\n", status_log);
-        return;
-    }
-
-    puts("Compiling fragments shader.");
-    unsigned int fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader, 1, &fragment_glsl, NULL);
-    glCompileShader(fragment_shader);
-
-    glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &status);
-    if(!status) {
-        glGetShaderInfoLog(fragment_shader, sizeof(status_log), NULL, status_log);
-        fprintf(stderr, "ERROR: Fragment Shader Compilation: %s\n", status_log);
-        return;
-    }
-   
-    // Link shaders
-    r->shader = glCreateProgram();
-    glAttachShader(r->shader, vertex_shader);
-    glAttachShader(r->shader, fragment_shader);
-    glLinkProgram(r->shader);
-
-    free((char *)vertex_glsl);
-    free((char *)fragment_glsl);
-    
-    puts("Finished shaders.");
+    r->shader = generate_shader(path.vertex_path, path.fragment_path);
 
     puts("Initialing textures.");
     glGenTextures(1, &r->texture_id);
@@ -92,6 +52,32 @@ void render_init(Renderer *r) {
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(texture.image_data);
     puts("Finished textures.");
+}
+
+void render_init_model(Mesh *mesh) {
+    puts("Initializing model.");
+    mesh->shader = generate_shader("C:\\Users\\zyhru\\graphics\\shaders\\modelvert.vert", "C:\\Users\\zyhru\\graphics\\shaders\\modelfrag.frag");
+
+    glGenVertexArrays(1, &mesh->vao);
+    glGenBuffers(1, &mesh->vbo);
+    glGenBuffers(1, &mesh->ebo);
+    
+    glBindVertexArray(mesh->vao);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(OBJVertex) * mesh->vertices->size, mesh->vertices->data, GL_STATIC_DRAW);
+    
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * mesh->indices->size, mesh->indices->data, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(OBJVertex), (void *)offsetof(OBJVertex, v));
+    glEnableVertexAttribArray(0);
+    
+
+    free_data(mesh->vertices->data);
+    free_data(mesh->indices->data);
+    
+    puts("Finished init model.");
 }
 
 void render_init_shapes(Renderer *r) {
@@ -151,8 +137,8 @@ void render_init_shapes(Renderer *r) {
         {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}}  // Bottom-left
     };
     
-    render_add_vertices(r, cube, sizeof(cube) / sizeof(cube[0]), 0);
-    render_add_vertices(r, triangle, sizeof(triangle) / sizeof(triangle[0]), 1);
+    render_add_vertices(r, cube, sizeof(cube) / sizeof(cube[0]), CUBE);
+    render_add_vertices(r, triangle, sizeof(triangle) / sizeof(triangle[0]), TRIANGLE);
 }
 
 void render_add_vertices(Renderer *r, Vertex *vertices, size_t v_count, int pos) {
@@ -170,7 +156,7 @@ void render_add_vertices(Renderer *r, Vertex *vertices, size_t v_count, int pos)
     if(!r->shapes[pos].vertices) {
         fprintf(stderr, "ERROR: failed to alloc mem for vertices");
         free(r->shapes[pos].vertices);
-        r->shapes->vertices = NULL;
+        r->shapes[pos].vertices = NULL;
         return;
     }
    
@@ -197,13 +183,21 @@ void render_add_vertices(Renderer *r, Vertex *vertices, size_t v_count, int pos)
     r->shapes[pos].vertices = NULL;
 }
 
+#if 1
+void render_model(Mesh *mesh) {
+    glBindVertexArray(mesh->vao);
+    glDrawElements(GL_TRIANGLES, mesh->indices->size, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+}
+#endif
+
 void render_cube(Renderer *r) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, r->texture_id);
     glUniform1i(glGetUniformLocation(r->shader, "minecraft_grass"), 0);
 
-    glBindVertexArray(r->shapes[0].vao);
-    glDrawArrays(GL_TRIANGLES, 0, r->shapes[0].vertices_count);
+    glBindVertexArray(r->shapes[CUBE].vao);
+    glDrawArrays(GL_TRIANGLES, 0, r->shapes[CUBE].vertices_count);
     glBindVertexArray(0);
 }
 
@@ -212,14 +206,21 @@ void render_triangle(Renderer *r) {
     glBindTexture(GL_TEXTURE_2D, r->texture_id);
     glUniform1i(glGetUniformLocation(r->shader, "minecraft_grass"), 0);
 
-    glBindVertexArray(r->shapes[1].vao);
-    glDrawArrays(GL_TRIANGLES, 0, r->shapes[1].vertices_count);
+    glBindVertexArray(r->shapes[TRIANGLE].vao);
+    glDrawArrays(GL_TRIANGLES, 0, r->shapes[TRIANGLE].vertices_count);
     glBindVertexArray(0);
 }
 
 void render_shader(Renderer *r) {
     glUseProgram(r->shader);
 }
+
+#if 1
+// need this for later (shapes & models)
+void render_shader_dynamic(unsigned int shader) {
+    glUseProgram(shader);
+}
+#endif
 
 void render_free(Vertex *vertices) {
     free(vertices);
@@ -252,4 +253,62 @@ Texture load_image(const char *file_name) {
 
     printf("Image Data: W: %d | H: %d\nFormat: %d\n", texture.x, texture.y, texture.format);
     return texture;
+}
+
+unsigned int generate_shader(const char *v, const char* f) {
+    puts("Reading shader files.");
+
+    unsigned int shader_id;
+    char *vertex_buffer, *fragment_buffer;
+    size_t vbuff_size, fbuff_size;
+    read_file_t(&vertex_buffer, &vbuff_size, v);
+    read_file_t(&fragment_buffer, &fbuff_size, f);
+
+    if(vbuff_size == 0 || fbuff_size == 0) {
+        fprintf(stderr, "ERROR: Shader file size is 0!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    puts("Compiling vertex shader.");
+    unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex_shader, 1, (char const * const *)&vertex_buffer, NULL);
+    glCompileShader(vertex_shader);
+
+    int status;
+    char status_log[STATUS_LOG_SIZE];
+    glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &status);
+    if(!status) {
+        glGetShaderInfoLog(vertex_shader, sizeof(status_log), NULL, status_log);
+        fprintf(stderr, "ERROR: Vertex Shader Compilation: %s\n", status_log);
+        exit(EXIT_FAILURE);
+    }
+
+    puts("Compiling fragments shader.");
+    unsigned int fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader, 1, (char const * const *)&fragment_buffer, NULL);
+    glCompileShader(fragment_shader);
+
+    glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &status);
+    if(!status) {
+        glGetShaderInfoLog(fragment_shader, sizeof(status_log), NULL, status_log);
+        fprintf(stderr, "ERROR: Fragment Shader Compilation: %s\n", status_log);
+        exit(EXIT_FAILURE);
+    }
+    
+    shader_id = glCreateProgram();
+    glAttachShader(shader_id, vertex_shader);
+    glAttachShader(shader_id, fragment_shader);
+    glLinkProgram(shader_id);
+
+    glGetShaderiv(shader_id, GL_LINK_STATUS, &status);
+    if(!status) {
+        glGetShaderInfoLog(shader_id, sizeof(status_log), NULL, status_log);
+        fprintf(stderr, "ERROR: Shader could not link: %s\n", status_log);
+        exit(EXIT_FAILURE);
+    }
+
+    free(vertex_buffer);
+    free(fragment_buffer);
+    puts("Finished shaders.");
+    return shader_id;
 }

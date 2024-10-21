@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.29)
 project(Z-Renderer LANGUAGES C)
 
-
 # Set C standard
 set(CMAKE_C_COMPILER "C:/msys64/mingw64/bin/gcc.exe")
 set(CMAKE_C_STANDARD 11)
@@ -46,6 +45,7 @@ add_executable(Z-Renderer
     src/util.c
     src/camera.c
     src/input.c
+    src/model.c
 )
 
 # Include directories for GLAD and GLFW
