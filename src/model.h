@@ -41,8 +41,15 @@
     } while(0)\
 
 typedef struct {
+    size_t cap;
+    size_t size;
+    char **data;
+} String;
+
+typedef struct {
     Vector3 v;
-    //Vector2 vt;
+    Vector2 vt;
+    Vector3 vn;
 } OBJVertex;
 
 typedef struct {
@@ -85,16 +92,20 @@ typedef struct {
 } Mesh;
 
 Mesh* import_model(const char* file);
+Mesh* import_model_test(const char* file);
 Mesh* MeshAlloc();
 VertexBuffer* init_vertices();
 IndexBuffer* init_indices();
 FaceElements init_faces();
 Vector3List      init_vec3_list();
 Vector2List      init_vec2_list();
+String* init_string();
+String* usplit(char *line, const char *delim);
+void append_string(String *s, char *item);
 Vector2 create_vec2(float x, float y);
 Vector3 create_vec3(float x, float y, float z);
 OBJVertex create_vertex(Vector3 pos, Vector2 uv);
-bool is_in_vbo(VertexBuffer *vbo, OBJVertex data);
+bool is_in_vbo(VertexBuffer *vbo, OBJVertex *data);
 void split(char **array, char *line, const char *delim);
 void model_free(Mesh *mesh);
 void destroy(char *s[], char *t[]);

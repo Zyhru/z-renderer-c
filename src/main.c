@@ -1,4 +1,5 @@
 #include "renderer.h"
+
 #include "window.h"
 #include "camera.h"
 
@@ -7,7 +8,7 @@
 void update(Context *ctx, Camera *camera, Input *input, float delta_time) {
     double xpos, ypos;
     glfwGetCursorPos(ctx->window, &xpos, &ypos);
-    
+
     camera_update(camera, input, delta_time);
     camera_look_around(camera, xpos, ypos);
     window_update(input);
@@ -19,7 +20,7 @@ int main(int argc, char **argv) {
     float delta_time = 0.0f;
     Input input = {0};
     Renderer r;
-    
+
     Context *ctx = window_init();
     if(!ctx) {
         ctx = NULL;
@@ -31,35 +32,36 @@ int main(int argc, char **argv) {
         camera = NULL;
         return 1;
     }
-    
+
     context_register_callbacks(ctx, &input);
 
     render_init(&r);
     render_init_shapes(&r);
-    
-    Mesh* model = import_model("C:\\Users\\zyhru\\graphics\\models\\test.obj");
+
+    // TODO: Pathing. Implement a relative path for passing in file paths
+    Mesh* model = import_model("C:\\Users\\zyhru\\graphics\\models\\gravestone.obj");
     if(!model->vertices) {
         Warning("%s\n", "Model vertices is null");
         return 1;
     }
-    
+
     if(!model->indices) {
         Warning("%s\n", "Model vertices is null");
         return 1;
     }
-    
-#if TESTING
-        printf("Mode: Testing\n");
-        for(int i = 0; i < model->vertices->size; ++i) {
-            printf("{%f, %f, %f}\n", 
-                   model->vertices->data[i].v.x, 
-                   model->vertices->data[i].v.y,
-                   model->vertices->data[i].v.z);
-        }
 
-        for(int i = 0; i < model->indices->size; ++i) {
-            printf("%u \n", model->indices->data[i]);
-        }
+#if TESTING
+    printf("Mode: Testing\n");
+    for(int i = 0; i < model->vertices->size; ++i) {
+        printf("{%f, %f, %f}\n", 
+               model->vertices->data[i].v.x, 
+               model->vertices->data[i].v.y,
+               model->vertices->data[i].v.z);
+    }
+
+    for(int i = 0; i < model->indices->size; ++i) {
+        printf("%u \n", model->indices->data[i]);
+    }
 
     Vector3 cube_pos[] = {  
         {5.0f, 0.0f, -7.0f},
@@ -69,7 +71,6 @@ int main(int argc, char **argv) {
         {-3.0f, 0.0f, -7.0f},
     };
 #endif
-
 
     render_init_model(model);
     glEnable(GL_DEPTH_TEST);
@@ -81,43 +82,25 @@ int main(int argc, char **argv) {
 
         clear_color(); // TODO: pass in custom color
         update(ctx, camera, &input, delta_time);
-       
+
         mat4 projection;
         glm_mat4_identity(projection);
         glm_mat4_identity(camera->view);
-        
+
         glm_perspective(glm_rad(camera->fov), (ctx->height / ctx->width), 0.1f, 100.0f, projection); // 0.1f near plane , 100f far plane
-        
+
         /* Camera */
         view_matrix(camera);
 
         render_shader(&r);
-        
+
         int projection_loc = glGetUniformLocation(r.shader, "projection");
         glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float *)projection);
 
         int view_loc       = glGetUniformLocation(r.shader, "view");
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float *)camera->view);
-       
+
         int model_loc = glGetUniformLocation(r.shader, "model");
-#if 0
-		/* Cube */
-        vec3 axis = {1.0f, 0.3f, 0.5f};
-        float angle = glm_rad(90.0f) * glfwGetTime();  // Speed of rotation
-        for(int i = 0; i < 5; ++i) {
-            mat4 model_cube;
-            glm_mat4_identity(model_cube);
-            
-            glm_translate_x(model_cube, cube_pos[i].x);
-            glm_translate_y(model_cube, cube_pos[i].y);
-            glm_translate_z(model_cube, cube_pos[i].z);
-            glm_rotate(model_cube, angle, axis); 
-            
-            int model_loc = glGetUniformLocation(r.shader, "model");
-            glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)model_cube);
-            render_cube(&r);
-        }
-#endif
 
         /* Single Cube 
 		   *  Obviously 3D

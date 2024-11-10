@@ -8,7 +8,7 @@
 - [ ] Font rendering (to add FPS)
 - [ ] create a macro for init_T_list
 
-## Bugs
+## Fixed Bugs
 - camera movement is being registered to fast due to the callback. [fixed]
 - Camera z axis is fucked still [fixed]
 - With the addition of the camera_look_around function, the initial camera direction is offsetted by alot. (need to fix: nothing major though)
@@ -23,6 +23,30 @@ sizeof(size) is always going to return the size of the **size_t size** parameter
 - Set up texture in shader and attribpointer
 - set up texture sampler2D uniform var
 - activate the texture when rendering
+
+
+## 11/10/2024 TODO: 
+- [ ] Port over testing code to main production code
+- [ ] Test testing code. Test only position vertices to see if the outline of the gravestone gets rendered  
+- [ ] I have to try to code after work (it's hard)
+
+## 11/3/2024 TODO: 
+(GREAT JOB ZAI, good improvement)
+- [x] Integerate normals even though I wont be directly using it
+- [x] Reread parsing logic, (it's been a week lmao)
+- [x] Look over diagram on how I though about a week ago for this logic  
+- [x] Try to finish basic parsing for slashes to start testing
+- [ ] Generate better documentation for when I take days off writing code, I can
+understand what the fuck I wrote. 
+
+## 10/27/24 TODO: 
+- [ ] Parse slashes from the faces
+
+## 10/22/24 TODO: 
+- [ ] Test our obj parser on more complex objects
+- [ ] gravestone.obj has 6 faces on some, implement a way to 
+handle this case
+- [ ] Begin testing parsing vt (vertices for textures (uv's)) for our final model (gravestone)
 
 ## 10/21/24 TODO: 
 - [x] Continue reading Ryan Fleurys article on Arena Allocators 
@@ -79,6 +103,7 @@ dynamic memory allocation
 see WARNING code above import_model
 
 - Fixed: Destroy function was having issues with freeing my temp arrays for parsing the v and vt. I was allocating only 4 bytes for each v position. (To small)
+- Needs fixing: is_in_vbo function logic is terrible (fix up...) (implement brute force correctly)
 
 ## Notes:
 - When doing any type of Vector Math, the result will always be a new vector.

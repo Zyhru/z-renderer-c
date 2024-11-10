@@ -1,5 +1,21 @@
 #include "model.h"
 
+String* usplit(char *line, const char *delim) {
+    String *sb = init_string();
+    char *context;
+    char *token = strtok_s(line, delim, &context);
+    int i = 0;
+
+    // append each token to string list
+    while(token != NULL) {
+        append_string(sb, token);
+        token = strtok_s(NULL, delim, &context);
+        ++i;
+    }
+    
+    return sb;
+}
+
 Mesh* MeshAlloc() {
     Mesh *m = z_malloc(sizeof(Mesh), "Mesh");
     if(!m) {
@@ -17,12 +33,61 @@ Mesh* MeshAlloc() {
     return m;
 }
 
+String* init_string() {
+    String *s = malloc(sizeof(String));
+    s->cap = LIST_CAPACITY;
+    s->size = 0;
+    s->data = malloc(sizeof(char *) * s->cap); // essentially 50 char pointers
+
+    if(!s->data) {
+        Warning("%s\n", "ERROR: Failed to allocate memory for string list"); 
+        exit(EXIT_FAILURE);
+    }
+
+    // now we need to allocate mem for each potential string
+    // allocating 30 bytes of space for each string, which is good because our strings wont really have alot of bytes
+    for(int i = 0; i < LIST_CAPACITY; ++i) {
+        s->data[i] = malloc(sizeof(char) * VERTICES_CAPACITY);
+        if(!s->data[i]) {
+            Warning("ERROR: Cannot allocate memory for string");
+            for(int j = 0; j < VERTICES_CAPACITY; ++j) {
+                free(s->data[j]);
+            }
+
+            free(s->data);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    return s;    
+}
+
+void append_string(String *s, char *item) {
+    // if the size exceeds the count limit, reallocate memory for more pointers and string data
+    if(s->size >= s->cap)  {
+        // reallocate memory
+        size_t new_cap = s->cap * 2;
+        char **temp = realloc(s->data, sizeof(char *) * new_cap);
+        if(!temp) {
+            Warning("%s\n", "ERROR: Unable to reallocate memory for string.\n");
+            free(temp);
+            exit(EXIT_FAILURE);
+        }
+        
+        s->cap = new_cap;
+        s->data = temp;
+    }
+
+    s->data[s->size++] = item;
+}
+
 VertexBuffer* init_vertices() {
     VertexBuffer *vertices = z_malloc(sizeof(VertexBuffer), "VertexBuffer");
     if(!vertices) {
         Warning("%s\n", "Vertex pointer is null");
         exit(EXIT_FAILURE);
     }
+
     vertices->capacity = LIST_CAPACITY;
     vertices->size = 0;
     vertices->data = z_malloc(sizeof(OBJVertex) * vertices->capacity, "OBJVertex");
@@ -119,17 +184,41 @@ OBJVertex create_vertex(Vector3 pos, Vector2 uv) {
     return ov;
 }
 
+
+void print_vertex(OBJVertex v) {
+    printf("Pos: (%f, %f, %f)\n", v.v.x, v.v.y, v.v.z);
+    printf("Tex: (%f, %f)\n", v.vt.x, v.vt.y);
+    printf("Norm: (%f, %f, %f)\n", v.vn.x, v.vn.y, v.vn.z);
+    printf("\n");
+}
+
 // O(N^2)
 // TODO: Implement a hashmap for faster look up -> e.g cpp way? find()
-bool is_in_vbo(VertexBuffer *vbo, OBJVertex data) {
+bool is_in_vbo(VertexBuffer *vbo, OBJVertex *data) {
+    //print_vertex(data);
     for(int i = 0; i < vbo->size; ++i) { // 0 < 0
-        if(data.v.x == vbo->data[i].v.x 
-        && data.v.y == vbo->data[i].v.y
-        && data.v.z == vbo->data[i].v.z) {
+        // WARNING: Refactor very sloppy. (if it works its works though?) lol
+
+             /* Positions */
+        if(data->v.x == vbo->data[i].v.x 
+        && data->v.y == vbo->data[i].v.y
+        && data->v.z == vbo->data[i].v.z
+        
+             /* Textures */
+        && data->vt.x == vbo->data[i].vt.x
+        && data->vt.y == vbo->data[i].vt.y
+        
+            /* Normals */
+        && data->vn.x == vbo->data[i].vn.x 
+        && data->vn.y == vbo->data[i].vn.y
+        && data->vn.z == vbo->data[i].vn.z) {
+            //print_vertex(data);
+            //print_vertex(vbo->data[i]);
             return true;
         }
     }
     
+    //printf("Unique!\n");
     return false;
 }
 
@@ -166,20 +255,20 @@ void destroy(char **s, char **t) {
 
 
 // Supporting one mesh for now
-// WARNING: z_malloc
-// 10/20/2024 : z_malloc was giving us our heap issues. Mistake: malloc(sizeof(size)) instead of malloc(size); (bruh)
 Mesh* import_model(const char *file) {
     puts("Importing model.");
+    const char* space_delim = " ";
+    const char* slash_delim = "/";
     Mesh *mesh = MeshAlloc();
     VertexBuffer *vertices = init_vertices();
     IndexBuffer *indices = init_indices(); 
-    
-    const char* space_delim = " ";
-    char line[LINE_BUF_SIZE];
-    char *temp_pos[VERTEX_SIZE] = {0};
-    char *temp_tex[TEXTURE_SIZE] = {0};
+    String *positions = NULL;
+    String *textures = NULL;
+    String *normals = NULL;
     Vector3List pos = init_vec3_list(); 
     Vector2List tex = init_vec2_list(); 
+    Vector3List norm = init_vec3_list(); 
+    char line[LINE_BUF_SIZE];
 
     //TODO: try fopen_s
     FILE *fp = fopen(file, "rb");
@@ -188,74 +277,138 @@ Mesh* import_model(const char *file) {
         fclose(fp);
         exit(EXIT_FAILURE);
     }
-
-    // BUG: 10/21/2024 Fixed freeing issue. Check todo.md
-    for(int i = 0; i < VERTEX_SIZE; ++i) {
-        temp_pos[i] = malloc(sizeof(char) * VERTICES_CAPACITY);
-        if(!temp_pos[i]) {
-            fprintf(stderr, "ERROR: Cannot allocate memory for temp_pos");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    for(int i = 0; i < TEXTURE_SIZE; ++i) {
-            temp_tex[i] = malloc(sizeof(char) * VERTICES_CAPACITY);
-            if(!temp_tex[i]) {
-                fprintf(stderr, "%s", "ERROR: Cannot allocate memory for temp_tex\n");
-                exit(EXIT_FAILURE);
-            }
-    }
     
-    puts("Parsing model.");
+    puts("Parsing model. (test)");
+    int vertex_index = 0;
     while(fgets(line, sizeof(line), fp) != NULL) {
         if(line[0] == 'v' && line[1] == ' ') {
-            split(temp_pos, line, space_delim);
-            float x = atof(temp_pos[1]);
-            float y = atof(temp_pos[2]);
-            float z = atof(temp_pos[3]);
+            positions = usplit(line, space_delim);
+            if(!positions) {
+                Warning("%s\n", "Generating positions has failed. (null)");
+                exit(EXIT_FAILURE);
+            }
+            float x = atof(positions->data[1]);
+            float y = atof(positions->data[2]);
+            float z = atof(positions->data[3]);
+            //printf("Positions: %f, %f, %f\n", x,y,z);
             z_append(pos, create_vec3(x,y,z));
         }
 
         if(line[0] == 'v' && line[1] == 't') {
-            split(temp_tex, line, space_delim);
-            float x = atof(temp_tex[1]);
-            float y = atof(temp_tex[2]);
+            textures = usplit(line, space_delim);
+            if(!textures) {
+                Warning("%s\n", "Generating textures has failed. (null)");
+                exit(EXIT_FAILURE);
+            }
+            float x = atof(textures->data[1]);
+            float y = atof(textures->data[2]);
+            //printf("Textures: %f, %f,\n", x,y);
             z_append(tex, create_vec2(x,y));
         }
-       
-        if(line[0] == 'f') {
-            FaceElements faces = init_faces();
-            for(int i = 2; i < strlen(line) - 2; ++i) {
-                if(line[i] != ' ') {
-                    int data = line[i] - '0';
-                    z_append(faces, data);
-                }
-            }
-            
-            for(int i = 0; i < faces.size; ++i) {
-                OBJVertex v;
-                v.v = pos.data[faces.data[i] - 1];
-                if(!is_in_vbo(vertices, v)) {
-                    z_append_ptr(vertices, v);
-                }
-            }
-           
-            if(faces.size == 4) { /* Triangulate */
-                /* triangle 1 */
-                z_append_ptr(indices, faces.data[0] - 1);
-                z_append_ptr(indices, faces.data[0 + 1] - 1);
-                z_append_ptr(indices, faces.data[0 + 2] - 1);
 
-                /* triangle 2 */
-                z_append_ptr(indices, faces.data[0] - 1);
-                z_append_ptr(indices, faces.data[0 + 2] - 1);
-                z_append_ptr(indices, faces.data[0 + 3] - 1);
-            } else if(faces.size == 3) {
-                // TODO: Implement regular triangles
+        if(line[0] == 'v' && line[1] == 'n') {
+            normals = usplit(line, space_delim);
+            if(!normals) {
+                Warning("%s\n", "Generating normals has failed. (null)");
+                exit(EXIT_FAILURE);
+            }
+            float x = atof(normals->data[1]);
+            float y = atof(normals->data[2]);
+            float z = atof(normals->data[3]);
+            //printf("Normals: %f, %f, %f\n", x,y,z);
+            z_append(norm, create_vec3(x,y,z));
+        }
+      
+        // TODO: Parse / e.g -> 11/1/1 8/2/1
+        if(line[0] == 'f') {
+            String *sb = usplit(line, space_delim);
+            for(int i = 1; i < sb->size; ++i) {
+                // TODO: If there is a slash then do this [ ]
+                // TODO: If there is a double slash then do this
+                // TODO: If there is a not a slash then do this
+                
+                String *faces = usplit(sb->data[i], slash_delim); // 11 1 2
+
+                // WARNING: Only handling vertices and textures. (ignoring normals)
+                OBJVertex v;
+                int pos_index = atoi(faces->data[0]) - 1; 
+                int tex_index = atoi(faces->data[1]) - 1;
+                int norm_index = atoi(faces->data[2]) - 1;
+               
+                v.v = pos.data[pos_index];
+                v.vt = tex.data[tex_index];
+                v.vn = norm.data[norm_index];
+               
+                #if 0 
+                for(int i = 0; i < pos.size; ++i) {
+                    printf("Pos %d: (%f, %f, %f)\n", i, pos.data[i].x, pos.data[i].y, pos.data[i].z);
+                }
+                printf("Pos Index: %d\n", pos_index); 
+                printf("Tex Index: %d\n", tex_index); 
+
+                //printf("Pos %d: (%f, %f, %f)\n", i, v.v.x, v.v.y, v.v.z);
+                //printf("UV %d: (%f, %f)\n", i, v.vt.x, v.vt.y);
+                #endif
+
+                // ignoring duplicate vertices
+                z_append_ptr(vertices, v);
+                free(faces);
+            }
+
+            printf("Vertices Size: [%zu]\n", vertices->size);
+            if(sb->size == 4) {
+                z_append_ptr(indices, vertices->size - 3);
+                z_append_ptr(indices, vertices->size - 2);
+                z_append_ptr(indices, vertices->size - 1);
+            } else if(sb->size  == 5) {
+                puts("Triangulating face with a size of 4!");
+                // Triangulate
+                /* first triangle */
+                // current size - 4
+                // current size - 3 
+                // current size - 2 
+                //
+                /* second triangle */
+                // current size - 4
+                // current size - 2 
+                // current size - 1 
+                
+                // first triangle
+                z_append_ptr(indices, vertices->size - 4);
+                z_append_ptr(indices, vertices->size - 3);
+                z_append_ptr(indices, vertices->size - 2);
+               
+                // second triangle
+                z_append_ptr(indices, vertices->size - 4);
+                z_append_ptr(indices, vertices->size - 2);
+                z_append_ptr(indices, vertices->size - 1);
+            } else if(sb->size == 7) {
+                puts("Triangulating face with a size of 6!");
+                for(int i = vertices->size - 6; i < vertices->size; ++i) {
+                    z_append_ptr(indices, i);
+                }
             }
             
-            free(faces.data);
+            free(sb);
+            
         }
+    }
+
+
+    #if 0
+    for(int i = 0; i < vertices->size; ++i) {
+        printf("Pos %d: (%f, %f, %f)\n", i, vertices->data[i].v.x, vertices->data[i].v.y, vertices->data[i].v.z);
+        printf("UV %d: (%f, %f)\n", i, vertices->data[i].vt.x, vertices->data[i].vt.y);
+    }
+    #endif
+
+
+    // WARNING: Testing index buffer data
+    // Time to pray that my data is good! :)
+    // 
+    puts("Index Buffer Data\n");
+    for(int i = 0; i < indices->size; ++i) {
+       printf("%u\n", indices->data[i]); 
     }
     
     puts("Finished parsing model.");
@@ -264,8 +417,11 @@ Mesh* import_model(const char *file) {
     mesh->indices = indices;
   
     fclose(fp);
-    destroy(temp_pos, temp_tex);     
+    free(positions);
+    free(textures);
+    free(normals);
     free(pos.data);
+    free(norm.data);
     free(tex.data);
     puts("Finished importing model.");
     return mesh;
@@ -279,10 +435,3 @@ void model_free(Mesh *model) {
         model = NULL;
     }
 }
-
-
-/*
-C:\Users\zyhru\graphics\src\model.c(188,9): warning C4133: 'function': incompatible types - from 'FILE *' to 'const char *const ' [C:\Users\zyhru\graphics\build\Z-Renderer.vcxproj]
-C:\Users\zyhru\graphics\src\model.c(197,13): warning C4133: 'function': incompatible types - from 'FILE *' to 'const char *const ' [C:\Users\zyhru\graphics\build\Z-Renderer.vcxproj]
-C:\Users\zyhru\graphics\src\model.c(205,17): warning C4133: 'function': incompatible types - from 'FILE *' to 'const char *const ' [C:\Users\z
-*/
