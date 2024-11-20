@@ -39,7 +39,8 @@ int main(int argc, char **argv) {
     render_init_shapes(&r);
 
     // TODO: Pathing. Implement a relative path for passing in file paths
-    Mesh* model = import_model("C:\\Users\\zyhru\\graphics\\models\\gravestone.obj");
+    // C:\Users\zyhru\graphics\assets\penger
+    Mesh* model = import_model("C:\\Users\\zyhru\\graphics\\assets\\penger\\penger.obj");
     if(!model->vertices) {
         Warning("%s\n", "Model vertices is null");
         return 1;

@@ -10,6 +10,7 @@ Paths path = {
     .texture =  {
         "C:\\Users\\zyhru\\graphics\\assets\\minecraft_grass.jpg",
         "C:\\Users\\zyhru\\graphics\\assets\\wall.jpg",
+        "C:\\Users\\zyhru\\graphics\\assets\\penger\\penger.png",
     }
 };
 
@@ -72,7 +73,9 @@ void render_init_model(Mesh *mesh) {
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(OBJVertex), (void *)offsetof(OBJVertex, v));
     glEnableVertexAttribArray(0);
-    
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(OBJVertex), (void *)offsetof(OBJVertex, vt));
+    glEnableVertexAttribArray(1);
 
     free_data(mesh->vertices->data);
     free_data(mesh->indices->data);
@@ -185,6 +188,11 @@ void render_add_vertices(Renderer *r, Vertex *vertices, size_t v_count, int pos)
 
 #if 1
 void render_model(Mesh *mesh) {
+    // bind the textures here
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, r->texture_id);
+    // glUniform1i(glGetUniformLocation(r->shader, "minecraft_grass"), 0);
+
     glBindVertexArray(mesh->vao);
     glDrawElements(GL_TRIANGLES, mesh->indices->size, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
@@ -256,7 +264,7 @@ Texture load_image(const char *file_name) {
 }
 
 unsigned int generate_shader(const char *v, const char* f) {
-    puts("Reading shader files.");
+    printf("Reading shader files: [%s] | [%s]\n", v, f);
 
     unsigned int shader_id;
     char *vertex_buffer, *fragment_buffer;

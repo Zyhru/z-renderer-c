@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "util.h"
 
+#define MATERIAL_FILE_OFFSET 7
 #define LINE_BUF_SIZE 256
 #define LIST_CAPACITY 50
 #define VERTICES_CAPACITY 30
@@ -83,6 +84,11 @@ typedef struct {
 } FaceElements;
 
 typedef struct {
+    char *texture_image;
+    char file_path[LINE_BUF_SIZE];
+} MTLLib;
+
+typedef struct {
     unsigned int shader; // 0
     unsigned int vao; // 4
     unsigned int vbo; // 8
@@ -91,8 +97,8 @@ typedef struct {
     VertexBuffer *vertices; // 36
 } Mesh;
 
-Mesh* import_model(const char* file);
-Mesh* import_model_test(const char* file);
+Mesh* import_model(const char *file);
+Mesh* import_model_test(const char *file);
 Mesh* MeshAlloc();
 VertexBuffer* init_vertices();
 IndexBuffer* init_indices();
@@ -108,4 +114,4 @@ OBJVertex create_vertex(Vector3 pos, Vector2 uv);
 bool is_in_vbo(VertexBuffer *vbo, OBJVertex *data);
 void split(char **array, char *line, const char *delim);
 void model_free(Mesh *mesh);
-void destroy(char *s[], char *t[]);
+void read_mtl_file(MTLLib *mat);

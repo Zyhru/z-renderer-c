@@ -1,112 +1,127 @@
+# TODOs for Renderer Project
+
 ## General TODO
-- [x] Implement moving camera left, right, forward and backwards
-- [x] Implement camera look around based on the mouse position
-- [x] Textures 
-- [x] Refactor to make creating a shader dynamic
-- [ ] 3D Model Loading (.obj) (more than partially done)
-- [ ] Custom color struct to pass easily change the window color
-- [ ] Font rendering (to add FPS)
-- [ ] create a macro for init_T_list
+- [x] Implement camera movement (left, right, forward, backward)  
+- [x] Implement camera look-around using mouse input  
+- [x] Add texture support  
+- [x] Refactor shader creation to be dynamic  
+- [ ] Detect file line endings (Unix: LF `\n`, Windows: CRLF `\r\n`)  
+- [ ] Complete 3D Model Loading (.obj)  
+  - [ ] Handle more advanced features (e.g., multiple meshes)  
+  - [ ] Support textures and materials in .obj parsing  
+- [ ] Create a custom color struct for easier window color changes  
+- [ ] Implement font rendering (e.g., display FPS)  
+- [ ] Add a macro for `init_T_list`  
 
-## Fixed Bugs
-- camera movement is being registered to fast due to the callback. [fixed]
-- Camera z axis is fucked still [fixed]
-- With the addition of the camera_look_around function, the initial camera direction is offsetted by alot. (need to fix: nothing major though)
-- Implementation of z_malloc was incorrect. I was doing void *data = malloc(sizeof(size))
-instead of void *data = malloc(size);
+---
 
-sizeof(size) is always going to return the size of the **size_t size** parameter which is 8, since size_t is 8 bytes
+## Current Focus
+### OBJ Importer
+- [x] Parse vertices (`v`)  
+- [x] Parse textures (`vt`)  
+- [x] Parse normals (`vn`) (defer lighting implementation for now)  
+- [ ] Handle faces with slashes (e.g., `f v/vt/vn`)  
+- [ ] Support textures and materials when parsing (`.mtl`)  
+- [ ] Handle duplicate vertices within VBO  
+- [ ] Test parser with more complex models (e.g., `gravestone.obj`)  
 
-## Textures TODO [done]
-- Load in the texture image with stb_image.h
-- Set mip map filtering options
-- Set up texture in shader and attribpointer
-- set up texture sampler2D uniform var
-- activate the texture when rendering
+### Textures
+- [x] Load texture images using `stb_image.h`  
+- [x] Configure mipmap filtering options  
+- [x] Set up texture in shaders and attribute pointers  
+- [x] Use `sampler2D` uniform variable for textures  
+- [x] Activate texture during rendering  
 
+---
 
-## 11/10/2024 TODO: 
-- [ ] Port over testing code to main production code
-- [ ] Test testing code. Test only position vertices to see if the outline of the gravestone gets rendered  
-- [ ] I have to try to code after work (it's hard)
+## Debugging Progress
+### Fixed Bugs
+- [x] Camera movement was too fast (callback issue)  
+- [x] Camera Z-axis alignment issue  
+- [x] Initial camera direction offset in `camera_look_around` function  
+- [x] Incorrect usage of `malloc` in `z_malloc`  
+  - Fixed from `malloc(sizeof(size))` to `malloc(size)`  
 
-## 11/3/2024 TODO: 
-(GREAT JOB ZAI, good improvement)
-- [x] Integerate normals even though I wont be directly using it
-- [x] Reread parsing logic, (it's been a week lmao)
-- [x] Look over diagram on how I though about a week ago for this logic  
-- [x] Try to finish basic parsing for slashes to start testing
-- [ ] Generate better documentation for when I take days off writing code, I can
-understand what the fuck I wrote. 
+### Issues to Address
+- [ ] Improve `is_in_vbo` logic (current brute-force approach is inefficient)  
+- [ ] Clean up shader uniform logic for various shaders  
+- [ ] Implement a hashmap for faster lookups in parsing  
 
-## 10/27/24 TODO: 
-- [ ] Parse slashes from the faces
+---
 
-## 10/22/24 TODO: 
-- [ ] Test our obj parser on more complex objects
-- [ ] gravestone.obj has 6 faces on some, implement a way to 
-handle this case
-- [ ] Begin testing parsing vt (vertices for textures (uv's)) for our final model (gravestone)
+## Backlog
+- [ ] Begin implementing arena allocator (for optimized memory management)  
+- [x] Generate better documentation to understand code after breaks  
+- [ ] Implement font rendering (e.g., FPS counter)  
+- [ ] Test importer with multiple meshes and materials  
 
-## 10/21/24 TODO: 
-- [x] Continue reading Ryan Fleurys article on Arena Allocators 
-- [x] Debug destroy function (within model.c) (free issues) (fixed 10/21/24)
-- [ ] Test our obj parser on more complex objects
-- [ ] Begin testing parsing vt (vertices for textures (uv's)) for our final model (gravestone)
+---
 
-## 10/20/24 TODO: 
-- [-] Read Ryan Fluerys article on Arena Allocator (https://www.rfleury.com/p/untangling-lifetimes-the-arena-allocator) (read a little bit)
-- [x] Keep on debugging -> freeing model issue.
-- [ ] Implement an arena allocator to migrate to main prod code for the renderer
-- [x] Push updated code
+## Notes & Learnings
+- Vector math results in new vectors; don’t modify existing ones.  
+- Using `extern`: Declare, then define before use.  
+- Be cautious with heap allocations and memory management when passing `Mesh` data.  
+- **Progress:** Fixed heap allocation issues in `import_model` by revising custom `malloc`.  
+- For better debugging, use descriptive macros and comments.  
 
-## 10/19/24 TODO: 
-- [ ] Figure out why freeing the model gives me a heap error
+---
 
-## 10/18/24 TODO: 
-- [x] Build a debug mode script for debugging purposes
-- [x] Triangle not being rendered in debug mode
-- [x] Render cube from cube.obj :)
-- [ ] Figure out why freeing the model gives me a heap error
+### Timeline-Based TODOs
+#### 11/19/2024  
+- [ ] Parse .mtl file for map_Kd
+- [ ] Apply textures to model
 
-## 10/16/24 TODO: 
-- [x] Read more on macros
-- [x] Debug more on the importer and glfwwindow not freeing (debug mode)
-- [ ] Investigate *destroy(char **s, char **t)* function. Not de-allocating correctly
-- [ ] Clean up shader uniform logic for various shaders
-- [ ] Implement a hashmap for faster lookup times 
+#### 11/17/2024  
+- [ ] Support textures in `.obj` parsing.  
+- [ ] Begin supporting models with multiple meshes.  
 
-## 10/15/24 (Tomorrow) TODO: 
-- [ ] Jot down what I've completed each day. e.g (10/15/24) -> Tasks Completed: - [ ] printed hello world (some shit like that))
-- [x] Clean up file structure
-- [x] Migrate my test 3D importer to main production 
-- [x] Shader function to create different shader id's
+#### 11/10/2024  
+- [x] Port testing code into main production.  
+- [ ] Test rendering outline of `gravestone.obj` using vertex positions.  
 
+#### 11/3/2024  
+- [x] Integrate normals parsing.  
+- [x] Review parsing logic and diagrams.  
+- [ ] Improve documentation for easier onboarding after breaks.  
 
-## Importer TODO
-- [x] Read each line, revise and test (almost done)
-- [x] handle various faces (just focus on making one thing work and work on this later)
-- [x] dynamic array for v,vt and normals
-- [x] parse vertices
-- [x] parse textures
-- [ ] parse normals (save for later, once I feel like adding lighting)
-- Apply testing code into main production code
+### 10/27/2024  
+- [ ] Parse slashes in face data.  
 
-## Issues 
-- When using extern Paths path, you must use the same name. I was using
-Paths paths (in renderer.c oops..) which != Paths path
+### 10/22/2024  
+- [ ] Test parser with complex objects.  
+- [ ] Handle cases where `.obj` has faces with more than 6 vertices.  
+- [ ] Begin parsing texture coordinates (`vt`) for `gravestone.obj`.  
 
-- Had some trouble passing the Mesh data back locally. Involves heap allocation and that crazy magic. Need to look into macros with
-dynamic memory allocation
+### 10/21/2024  
+- [x] Continue reading Ryan Fleury’s article on arena allocators.  
+- [x] Debug `destroy` function (free issues).  
+- [ ] Test parser with complex objects.  
+- [ ] Begin parsing texture coordinates (`vt`).  
 
-- Finally got over the heap allocation hump that involved import_model (Mesh *). I created a custom malloc function and the internals was incorrect,
-see WARNING code above import_model
+### 10/20/2024  
+- [-] Read Ryan Fleury’s article on arena allocators (partial progress).  
+- [x] Debug freeing model memory issues.  
+- [ ] Implement arena allocator in main production code.  
+- [x] Push updated code.  
 
-- Fixed: Destroy function was having issues with freeing my temp arrays for parsing the v and vt. I was allocating only 4 bytes for each v position. (To small)
-- Needs fixing: is_in_vbo function logic is terrible (fix up...) (implement brute force correctly)
+### 10/19/2024  
+- [ ] Debug heap error when freeing model memory.  
 
-## Notes:
-- When doing any type of Vector Math, the result will always be a new vector.
-- When using **extern** you must first declare, then define it wherever you want to use it.
-- Made some progress, need to figure out a way of passing mesh info from heap back to main
-- z_malloc logic was incorrect
+### 10/18/2024  
+- [x] Build debug mode script.  
+- [x] Debug triangle rendering in debug mode.  
+- [x] Render cube from `cube.obj`.  
+- [ ] Debug heap error when freeing model memory.  
+
+### 10/16/2024  
+- [x] Learn more about macros.  
+- [x] Debug `glfwwindow` and importer memory issues.  
+- [ ] Investigate `destroy(char **s, char **t)` (not deallocating correctly).  
+- [ ] Clean up shader uniform logic.  
+- [ ] Implement hashmap for faster lookups.  
+
+### 10/15/2024  
+- [ ] Log daily progress consistently.  
+- [x] Clean up file structure.  
+- [x] Migrate test 3D importer to main production.  
+- [x] Add shader creation functions.

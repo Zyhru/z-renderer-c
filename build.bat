@@ -3,7 +3,7 @@ echo "Building project..."
 echo "MODE = Release"
 
 cd build/
-cmake .
+cmake ..
 cmake --build .
 Debug\\Z-Renderer.exe
 cd ..

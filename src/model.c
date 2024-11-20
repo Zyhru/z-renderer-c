@@ -16,6 +16,28 @@ String* usplit(char *line, const char *delim) {
     return sb;
 }
 
+// Fixed: Full path issue. 11/10/2024 :) ... slow progress
+void read_mtl_file(MTLLib *mat) {
+    FILE *fp = fopen(mat->file_path, "rb");
+    if(!fp) {
+        Warning("Unable to open file %s\n", mat->file_path);
+        exit(EXIT_FAILURE);
+    }
+
+    
+    char line[LINE_BUF_SIZE];
+    puts("Reading MTL file..");
+    while(fgets(line, sizeof(line), fp)) {
+        
+        // TODO: Save texture image (map_Kd)
+        // split each line, if first token is equal to map_Kd, grab the second token
+        if(strcmp(line, "map_Kd") == 0) {
+            printf("Texture image: %s", line); 
+        }
+
+    }
+}
+
 Mesh* MeshAlloc() {
     Mesh *m = z_malloc(sizeof(Mesh), "Mesh");
     if(!m) {
@@ -235,30 +257,14 @@ void split(char **array, char *line, const char *delim) {
 
 }
 
-// 10/21/2024: Issue fixed on freeing memory allocating for temp_pos. I was only using 4 bytes of memory allocation per string.
-// TODO: Change memory allocation from heap to stack, since I know how much memory I need.
-void destroy(char **s, char **t) {
-    for(int i = 0; i < VERTEX_SIZE; ++i) {
-        if(s[i]) {
-            free(s[i]);
-            s[i] = NULL;
-        }
-    }
-
-    for(int i = 0; i < TEXTURE_SIZE; ++i) {
-        if(s[i]) {
-            free(t[i]);
-            s[i] = NULL;
-        }
-    }
-}
-
 
 // Supporting one mesh for now
 Mesh* import_model(const char *file) {
     puts("Importing model.");
     const char* space_delim = " ";
     const char* slash_delim = "/";
+    // TODO: Fix absolute pathing, shit is ass
+    char prepend[LINE_BUF_SIZE] = "C:\\Users\\zyhru\\graphics\\assets\\penger\\";
     Mesh *mesh = MeshAlloc();
     VertexBuffer *vertices = init_vertices();
     IndexBuffer *indices = init_indices(); 
@@ -268,6 +274,7 @@ Mesh* import_model(const char *file) {
     Vector3List pos = init_vec3_list(); 
     Vector2List tex = init_vec2_list(); 
     Vector3List norm = init_vec3_list(); 
+    MTLLib material;
     char line[LINE_BUF_SIZE];
 
     //TODO: try fopen_s
@@ -281,6 +288,42 @@ Mesh* import_model(const char *file) {
     puts("Parsing model. (test)");
     int vertex_index = 0;
     while(fgets(line, sizeof(line), fp) != NULL) {
+        
+        // mtllib penger.mtl\r\n 
+        if(line[0] == 'm') {
+            // 18 - 1 = 17 - 7 = 10
+            size_t mtlfile_len = (strlen(line) - 1) - MATERIAL_FILE_OFFSET; // 17 - 7 = 10
+            char *material_file = malloc(mtlfile_len + 1); // 10 + 1 (for null term char)
+            if(!material_file) {
+                Warning("%s\n", "Could not allocate memory for the material file.");
+                exit(EXIT_FAILURE);
+            }
+
+            // strlen(line) = 18 - 2 = 16 because of 0 based indices bruh
+            // 7 unti l6
+            // 0123456789012345617
+            // mtllib penger.mtl\n
+            for(int i = MATERIAL_FILE_OFFSET, c = 0; i < strlen(line); ++i, c++) {
+                material_file[c] = line[i];
+            }
+            
+            material_file[mtlfile_len] = '\0';
+            
+            for(int i = 0; i < strlen(material_file); ++i) {
+                printf("test: %d\n", (int)material_file[i]);
+            }
+            
+            
+            printf("line Length: %zu\n", strlen(line));
+            printf("mtlfile Length: %zu\n", mtlfile_len);
+            printf("material_file Length: %zu\n", strlen(material_file));
+
+            snprintf(material.file_path, sizeof(material.file_path), "%s%s", prepend, material_file);
+            //printf("MTL file path: %s\n", material.file_path);
+            read_mtl_file(&material);
+            return mesh;
+        }
+
         if(line[0] == 'v' && line[1] == ' ') {
             positions = usplit(line, space_delim);
             if(!positions) {
@@ -326,10 +369,8 @@ Mesh* import_model(const char *file) {
                 // TODO: If there is a slash then do this [ ]
                 // TODO: If there is a double slash then do this
                 // TODO: If there is a not a slash then do this
-                
                 String *faces = usplit(sb->data[i], slash_delim); // 11 1 2
 
-                // WARNING: Only handling vertices and textures. (ignoring normals)
                 OBJVertex v;
                 int pos_index = atoi(faces->data[0]) - 1; 
                 int tex_index = atoi(faces->data[1]) - 1;
@@ -362,17 +403,7 @@ Mesh* import_model(const char *file) {
                 z_append_ptr(indices, vertices->size - 1);
             } else if(sb->size  == 5) {
                 puts("Triangulating face with a size of 4!");
-                // Triangulate
-                /* first triangle */
-                // current size - 4
-                // current size - 3 
-                // current size - 2 
-                //
-                /* second triangle */
-                // current size - 4
-                // current size - 2 
-                // current size - 1 
-                
+               
                 // first triangle
                 z_append_ptr(indices, vertices->size - 4);
                 z_append_ptr(indices, vertices->size - 3);
@@ -404,8 +435,7 @@ Mesh* import_model(const char *file) {
 
 
     // WARNING: Testing index buffer data
-    // Time to pray that my data is good! :)
-    // 
+    // Time to pray that my data is good! :) (It was good)
     puts("Index Buffer Data\n");
     for(int i = 0; i < indices->size; ++i) {
        printf("%u\n", indices->data[i]); 
