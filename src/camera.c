@@ -17,24 +17,28 @@ Camera* camera_init(Context *ctx, float fov) {
     camera->y = -(ctx->height / 2);
 
     printf("Initial X,Y: (%f, %f)\n", camera->x, camera->y);
-    
+   
+    // position
     camera->pos[0] = 0.0f; // x
     camera->pos[1] = 0.0f; // y
     camera->pos[2] = 0.0f; // z
-   
+  
+    // up vector
     camera->up[0] = 0.0f; // x 
     camera->up[1] = 1.0f; // y
     camera->up[2] = 0.0f; // z
-   
+  
+    // direction that it is facing
     camera->front[0] = 0.0f;  // x 
     camera->front[1] = 0.0f;  // y
     camera->front[2] = -1.0f; // z
     return camera;
 }
 
+// local -> world? -> view -> clip -> screen
 void view_matrix(Camera *cam) {
     vec3 front_t = {0.0f, 0.0f, 0.0f};
-    glm_vec3_add(cam->pos, cam->front, front_t);
+    glm_vec3_add(cam->pos, cam->front, front_t); // pos + direction 
     glm_lookat(cam->pos, front_t, cam->up, cam->view);
 }
 

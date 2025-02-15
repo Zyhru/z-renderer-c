@@ -8,6 +8,7 @@
 #include <stdbool.h>
 
 #include "input.h"
+#include "util.h"
 
 typedef struct  {
     float width;

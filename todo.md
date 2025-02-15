@@ -1,17 +1,40 @@
 # TODOs for Renderer Project
 
+## DLLS being used (Windows)
+    - GDI32.dll
+    - KERNEL32.dll
+    - USER32.dll
+    - SHELL32.dll
+    - VCRUNTIME140D.dll
+    - ucrtbased.dll
+
+## Static Libraries being used:
+    - cglm
+    - glfw
+    - glad
+
+## Main Goal: 
+
+- [ ] Setup a cleaner environment for building
+    Have a smoother system for cross-platform compilation
+
+## Bugs
+- [ ] Main release mode does not render: model, triangle, and cube
+
 ## General TODO
 - [x] Implement camera movement (left, right, forward, backward)  
 - [x] Implement camera look-around using mouse input  
 - [x] Add texture support  
 - [x] Refactor shader creation to be dynamic  
-- [ ] Detect file line endings (Unix: LF `\n`, Windows: CRLF `\r\n`)  
 - [ ] Complete 3D Model Loading (.obj)  
   - [ ] Handle more advanced features (e.g., multiple meshes)  
   - [ ] Support textures and materials in .obj parsing  
-- [ ] Create a custom color struct for easier window color changes  
 - [ ] Implement font rendering (e.g., display FPS)  
-- [ ] Add a macro for `init_T_list`  
+- [ ] Implement ImGui
+- [ ] Create a build automation config system (not really related to this project, but for future projects)
+- [ ] Attach a space texture to the scene (How do I do this?) 
+- [ ] Controller support (Move around with the controller, if plugged in)
+- [ ] Use basic reneder features to render the dvd logo (Haven't worked on this renderer in months.. due to work and laziness)
 
 ---
 

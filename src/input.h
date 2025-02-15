@@ -10,6 +10,8 @@
 #include <stdbool.h>
 #include <GLFW/glfw3.h>
 
+#include "util.h"
+
 #define KEY_COUNT 257
 
 typedef struct {

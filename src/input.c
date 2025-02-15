@@ -3,7 +3,7 @@
 void input_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     Input *input = (Input *)glfwGetWindowUserPointer(window);
     if(!input) {
-        fprintf(stderr, "ERROR: Window pointer is invalid\n");
+        ZLOG_INFO("%s", "Window pointer is invalid");
         return;
     }
 

@@ -1,5 +1,21 @@
 #include "util.h"
 
+void z_log_msg(const char *level, const char *file, int line, const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+
+    time_t t = time(NULL);
+    struct tm *tm_info = localtime(&t);
+    char time_str[20];
+    strftime(time_str, sizeof(time_str), "%H:%M:%S", tm_info);
+    
+    printf("[%s] [%s] %s:%d - ", time_str, level, file, line);
+    vprintf(fmt, args);
+    printf("\n");
+
+    va_end(args);
+}
+
 void* z_malloc(size_t size, const char *name) {
     void *ptr = malloc(size);
     if(!ptr) {

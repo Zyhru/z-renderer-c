@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
         delta_time = curr_frame - last_frame;
         last_frame = curr_frame;
 
-        clear_color(); // TODO: pass in custom color
+        clear_color(0.5f, 0.4f, 0.0f); // TODO: pass in custom color
         update(ctx, camera, &input, delta_time);
 
         mat4 projection;
@@ -89,6 +89,7 @@ int main(int argc, char **argv) {
         glm_mat4_identity(camera->view);
 
         glm_perspective(glm_rad(camera->fov), (ctx->height / ctx->width), 0.1f, 100.0f, projection); // 0.1f near plane , 100f far plane
+        //glm_ortho(0.0f, ctx->height, ctx->width, 0.0f, 0.1f, 100.f, projection);
 
         /* Camera */
         view_matrix(camera);

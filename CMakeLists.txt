@@ -1,13 +1,21 @@
-cmake_minimum_required(VERSION 3.29)
-project(Z-Renderer LANGUAGES C)
+cmake_minimum_required(VERSION 3.22)
+project(Z-Renderer C)
 
 # Set C standard
-set(CMAKE_C_COMPILER "C:/msys64/mingw64/bin/gcc.exe")
+set(CMAKE_C_COMPILER "C:/msys64/mingw64/bin")
+
+# cross-plat 
+# set(CMAKE_C_COMPILER "/usr/bin/gcc")
+
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # FetchContent module to download external dependencies
 include(FetchContent)
+
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 # Fetch GLAD (OpenGL loader)
 FetchContent_Declare(
@@ -25,10 +33,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-
 # Fetch cglm (mathematics library for OpenGL)
 FetchContent_Declare(
   cglm
@@ -38,8 +42,12 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(cglm)
 
 # Add executable (point this to your source file)
+# Make it where I could decide which main to use. 
+# Something like adding a flag such as: 
+# ZRENDERER_PROJ | DVD_PROJ
 add_executable(Z-Renderer 
-    src/main.c
+    src/main.c  ## cross plat
+    #examples/dvd.c
     src/window.c
     src/renderer.c
     src/util.c
@@ -52,12 +60,15 @@ add_executable(Z-Renderer
 target_include_directories(Z-Renderer PUBLIC ${glad_SOURCE_DIR}/include)
 target_include_directories(Z-Renderer PUBLIC ${glfw_SOURCE_DIR}/include)
 target_include_directories(Z-Renderer PUBLIC ${cglm_SOURCE_DIR}/include)
-
-# Link the libraries (GLFW, GLAD, and OpenGL)
-target_link_libraries(Z-Renderer glfw glad opengl32)
+  
+find_package(OpenGL::GL REQUIRED)
+target_link_libraries(Z-Renderer glfw glad)
 
 # Windows-specific linking (gdi32 for OpenGL)
 if (WIN32)
    target_link_libraries(Z-Renderer gdi32)
+elseif (UNIX)
+    # add compile options
+    # find opengl for linux
+    target_link_libraries(Z-Renderer)
 endif()
-
