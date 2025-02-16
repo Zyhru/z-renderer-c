@@ -1,5 +1,10 @@
 # TODOs for Renderer Project
 
+## Bugs
+- [ ] Parse .obj file with faces for no slash
+- [ ] Parse .obj file with faces for single slashes
+- [ ] Parse .obj file with faces for double slashes
+
 ## General TODO
 - [x] Implement camera movement (left, right, forward, backward)  
 - [x] Implement camera look-around using mouse input  

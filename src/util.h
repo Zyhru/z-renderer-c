@@ -12,11 +12,6 @@
 #define ZMALLOC_ERROR(...) fprintf(stderr, name, __VA_ARGS__)
 #define Warning(...) fprintf(stderr,  __VA_ARGS__)
 
-char* read_file(const char* path);
-void  read_file_t(char **buffer, size_t *buff_size, const char* path);
-void* z_malloc(size_t size, const char *name);
-void free_data(void *data);
-
 typedef struct {
     const char *vertex_path;
     const char *fragment_path;
@@ -24,9 +19,9 @@ typedef struct {
 } Paths;
 
 typedef struct {
-    float x; // 0
-    float y; // 4
-    float z; // 8
+    float x;
+    float y;
+    float z;
 } Vector3;
 
 typedef struct {
@@ -34,5 +29,10 @@ typedef struct {
     float y;
 } Vector2;
 
+void    z_print_vec3(Vector3 *data, int size);
+void    z_print_uint(unsigned int *data);
+void    z_read_file(char **buffer, size_t *buff_size, const char* path);
+void*   z_malloc(size_t size, const char *name);
+void    z_free_data(void *data);
 
 extern Paths path;

@@ -1,5 +1,43 @@
 #include "model.h"
 
+typedef enum {
+    INITIAL,
+    NO_SLASH,
+    SINGLE_SLASH,
+    DOUBLE_SLASH
+} SlashTypes_E;
+
+static void parse_no_slash(String *sb, IndexBuffer *indices) {
+    puts("TESTING NEW FUNCTION");
+    int zero = atoi(sb->data[1]) - 1;
+    int one = atoi(sb->data[2]) - 1;
+    int two = atoi(sb->data[3]) - 1;
+    int three = atoi(sb->data[4]) - 1;
+
+    //printf("New Face: {%d, %d, %d, %d}\n", zero, one, two, three);
+
+    // first triangle
+    z_append_ptr(indices, zero);
+    z_append_ptr(indices, one);
+    z_append_ptr(indices, two);
+
+    // second triangle
+    z_append_ptr(indices, zero);
+    z_append_ptr(indices, two);
+    z_append_ptr(indices, three);
+
+}
+
+static void parse_single_slash() {
+    Warning("%s", "Parsing face with single slashes.");
+}
+
+// WARNING: Probably will not be implementing this.
+static void parse_double_slash() {
+    Warning("%s", "Parsing face with double slashes.");
+
+}
+
 String* usplit(char *line, const char *delim) {
     String *sb = init_string();
     char *context;
@@ -16,7 +54,6 @@ String* usplit(char *line, const char *delim) {
     return sb;
 }
 
-// Fixed: Full path issue. 11/10/2024 :) ... slow progress
 void read_mtl_file(MTLLib *mat) {
     FILE *fp = fopen(mat->file_path, "rb");
     if(!fp) {
@@ -24,7 +61,6 @@ void read_mtl_file(MTLLib *mat) {
         exit(EXIT_FAILURE);
     }
 
-    
     char line[LINE_BUF_SIZE];
     puts("Reading MTL file..");
     while(fgets(line, sizeof(line), fp)) {
@@ -199,13 +235,13 @@ Vector3 create_vec3(float x, float y, float z) {
 }
 
 // TODO: Test with textures
-OBJVertex create_vertex(Vector3 pos, Vector2 uv) {
+OBJVertex create_obj_vertex(Vector3 pos, Vector2 uv, Vector3 vn) {
     OBJVertex ov;
     ov.v = pos;
-    //ov.vt = uv;
+    ov.vt = uv;
+    ov.vn = vn;
     return ov;
 }
-
 
 void print_vertex(OBJVertex v) {
     printf("Pos: (%f, %f, %f)\n", v.v.x, v.v.y, v.v.z);
@@ -263,8 +299,11 @@ Mesh* import_model(const char *file) {
     puts("Importing model.");
     const char* space_delim = " ";
     const char* slash_delim = "/";
+   
     // TODO: Fix absolute pathing, shit is ass
     char prepend[LINE_BUF_SIZE] = "C:\\Users\\zyhru\\graphics\\assets\\penger\\";
+    char line[LINE_BUF_SIZE];
+    
     Mesh *mesh = MeshAlloc();
     VertexBuffer *vertices = init_vertices();
     IndexBuffer *indices = init_indices(); 
@@ -275,9 +314,11 @@ Mesh* import_model(const char *file) {
     Vector2List tex = init_vec2_list(); 
     Vector3List norm = init_vec3_list(); 
     MTLLib material;
-    char line[LINE_BUF_SIZE];
+    SlashTypes_E slash_type = INITIAL;
 
-    //TODO: try fopen_s
+
+    VertexBuffer *ns_vertices = init_vertices();
+
     FILE *fp = fopen(file, "rb");
     if(!fp) {
         fprintf(stderr, "ERROR: Failed to open obj file\n");
@@ -285,24 +326,18 @@ Mesh* import_model(const char *file) {
         exit(EXIT_FAILURE);
     }
     
-    puts("Parsing model. (test)");
+    printf("Parsing model: %s\n", file);
     int vertex_index = 0;
     while(fgets(line, sizeof(line), fp) != NULL) {
         
-        // mtllib penger.mtl\r\n 
         if(line[0] == 'm') {
-            // 18 - 1 = 17 - 7 = 10
-            size_t mtlfile_len = (strlen(line) - 1) - MATERIAL_FILE_OFFSET; // 17 - 7 = 10
-            char *material_file = malloc(mtlfile_len + 1); // 10 + 1 (for null term char)
+            size_t mtlfile_len = (strlen(line) - 1) - MATERIAL_FILE_OFFSET;
+            char *material_file = malloc(mtlfile_len + 1);
             if(!material_file) {
                 Warning("%s\n", "Could not allocate memory for the material file.");
                 exit(EXIT_FAILURE);
             }
 
-            // strlen(line) = 18 - 2 = 16 because of 0 based indices bruh
-            // 7 unti l6
-            // 0123456789012345617
-            // mtllib penger.mtl\n
             for(int i = MATERIAL_FILE_OFFSET, c = 0; i < strlen(line); ++i, c++) {
                 material_file[c] = line[i];
             }
@@ -313,7 +348,6 @@ Mesh* import_model(const char *file) {
                 printf("test: %d\n", (int)material_file[i]);
             }
             
-            
             printf("line Length: %zu\n", strlen(line));
             printf("mtlfile Length: %zu\n", mtlfile_len);
             printf("material_file Length: %zu\n", strlen(material_file));
@@ -321,10 +355,11 @@ Mesh* import_model(const char *file) {
             snprintf(material.file_path, sizeof(material.file_path), "%s%s", prepend, material_file);
             //printf("MTL file path: %s\n", material.file_path);
             read_mtl_file(&material);
-            return mesh;
+            //return mesh;
         }
 
         if(line[0] == 'v' && line[1] == ' ') {
+            //puts("Parsing vertices");
             positions = usplit(line, space_delim);
             if(!positions) {
                 Warning("%s\n", "Generating positions has failed. (null)");
@@ -355,6 +390,7 @@ Mesh* import_model(const char *file) {
                 Warning("%s\n", "Generating normals has failed. (null)");
                 exit(EXIT_FAILURE);
             }
+
             float x = atof(normals->data[1]);
             float y = atof(normals->data[2]);
             float z = atof(normals->data[3]);
@@ -362,9 +398,25 @@ Mesh* import_model(const char *file) {
             z_append(norm, create_vec3(x,y,z));
         }
       
-        // TODO: Parse / e.g -> 11/1/1 8/2/1
+        // TODO: Parse no slash [DONE]
+        // TODO: Parse single slash
+        // TODO: Parse double slash
         if(line[0] == 'f') {
             String *sb = usplit(line, space_delim);
+            char *res = strchr(line, space_delim[0]);
+            if(!res) {
+                puts("Parsing face with no slashes.\n");
+                slash_type = NO_SLASH;
+            } else {
+                long long position = res - line;
+                if(line[position + 1] == '/') {
+                    slash_type = DOUBLE_SLASH;
+                } else { 
+                    slash_type = SINGLE_SLASH;
+                }
+            }
+            
+            #if 0
             for(int i = 1; i < sb->size; ++i) {
                 // TODO: If there is a slash then do this [ ]
                 // TODO: If there is a double slash then do this
@@ -395,53 +447,51 @@ Mesh* import_model(const char *file) {
                 z_append_ptr(vertices, v);
                 free(faces);
             }
+            #endif
 
-            printf("Vertices Size: [%zu]\n", vertices->size);
+            //printf("Vertices Size: [%zu]\n", vertices->size);
             if(sb->size == 4) {
+                puts("No need for triangluation.");
                 z_append_ptr(indices, vertices->size - 3);
                 z_append_ptr(indices, vertices->size - 2);
                 z_append_ptr(indices, vertices->size - 1);
             } else if(sb->size  == 5) {
-                puts("Triangulating face with a size of 4!");
+                puts("Triangulating face with a size of 4.");
+                if(slash_type == NO_SLASH) {
+                    parse_no_slash(sb, indices);
+                } else {
+                    // first triangle
+                    z_append_ptr(indices, vertices->size - 4);
+                    z_append_ptr(indices, vertices->size - 3);
+                    z_append_ptr(indices, vertices->size - 2);
+                    
+                    // second triangle
+                    z_append_ptr(indices, vertices->size - 4);
+                    z_append_ptr(indices, vertices->size - 2);
+                    z_append_ptr(indices, vertices->size - 1);
+                }
                
-                // first triangle
-                z_append_ptr(indices, vertices->size - 4);
-                z_append_ptr(indices, vertices->size - 3);
-                z_append_ptr(indices, vertices->size - 2);
-               
-                // second triangle
-                z_append_ptr(indices, vertices->size - 4);
-                z_append_ptr(indices, vertices->size - 2);
-                z_append_ptr(indices, vertices->size - 1);
             } else if(sb->size == 7) {
-                puts("Triangulating face with a size of 6!");
+                puts("Triangulating face with a size of 6.");
                 for(int i = vertices->size - 6; i < vertices->size; ++i) {
                     z_append_ptr(indices, i);
                 }
             }
             
             free(sb);
-            
         }
     }
 
-
-    #if 0
-    for(int i = 0; i < vertices->size; ++i) {
-        printf("Pos %d: (%f, %f, %f)\n", i, vertices->data[i].v.x, vertices->data[i].v.y, vertices->data[i].v.z);
-        printf("UV %d: (%f, %f)\n", i, vertices->data[i].vt.x, vertices->data[i].vt.y);
+    if(slash_type == NO_SLASH) {
+        puts("MAJOR MINOR PATCH Setting positions to vertices.");
+        for(int i = 0; i < pos.size; ++i) {
+            // add the positions to the vbo
+            OBJVertex obj_vertex;
+            obj_vertex.v = pos.data[i];
+            z_append_ptr(vertices, obj_vertex);
+            //printf("{%f, %f, %f}\n", obj_vertex.v.x, obj_vertex.v.y, obj_vertex.v.z);
+        }
     }
-    #endif
-
-
-    // WARNING: Testing index buffer data
-    // Time to pray that my data is good! :) (It was good)
-    puts("Index Buffer Data\n");
-    for(int i = 0; i < indices->size; ++i) {
-       printf("%u\n", indices->data[i]); 
-    }
-    
-    puts("Finished parsing model.");
    
     mesh->vertices = vertices;
     mesh->indices = indices;
@@ -453,7 +503,7 @@ Mesh* import_model(const char *file) {
     free(pos.data);
     free(norm.data);
     free(tex.data);
-    puts("Finished importing model.");
+    puts("Finished parsing model.");
     return mesh;
 }
 

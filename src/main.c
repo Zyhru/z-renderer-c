@@ -3,6 +3,10 @@
 #include "window.h"
 #include "camera.h"
 
+#define MAJOR 0
+#define MINOR 2
+#define PATCH 0
+
 #define TESTING 0
 
 void update(Context *ctx, Camera *camera, Input *input, float delta_time) {
@@ -15,7 +19,7 @@ void update(Context *ctx, Camera *camera, Input *input, float delta_time) {
 }
 
 int main(int argc, char **argv) {
-    puts("z-renderer v.0.1.2");
+    printf("Project Name: Z-Renderer\nVERSION: %d.%d.%d", MAJOR, MINOR, PATCH);
     float last_frame = 0.0f;
     float delta_time = 0.0f;
     Input input = {0};
@@ -35,12 +39,10 @@ int main(int argc, char **argv) {
 
     context_register_callbacks(ctx, &input);
 
-    render_init(&r);
-    render_init_shapes(&r);
 
     // TODO: Pathing. Implement a relative path for passing in file paths
-    // C:\Users\zyhru\graphics\assets\penger
-    Mesh* model = import_model("C:\\Users\\zyhru\\graphics\\assets\\penger\\penger.obj");
+    // Mesh* model = import_model("C:\\Users\\zyhru\\graphics\\assets\\penger\\penger.obj");
+    Mesh* model = import_model("C:\\Users\\zyhru\\graphics\\models\\test.obj");
     if(!model->vertices) {
         Warning("%s\n", "Model vertices is null");
         return 1;
@@ -61,21 +63,15 @@ int main(int argc, char **argv) {
     }
 
     for(int i = 0; i < model->indices->size; ++i) {
-        printf("%u \n", model->indices->data[i]);
+        printf("%u\n", model->indices->data[i]);
     }
-
-    Vector3 cube_pos[] = {  
-        {5.0f, 0.0f, -7.0f},
-        {3.0f, 0.0f, -7.0f},
-        {1.0f, 0.0f, -7.0f},
-        {-1.0f, 0.0f, -7.0f},
-        {-3.0f, 0.0f, -7.0f},
-    };
 #endif
-
+    
+    render_init(&r);
+    render_init_shapes(&r);
     render_init_model(model);
+    
     glEnable(GL_DEPTH_TEST);
-
     while(!should_close(ctx) && !window_closed(ctx->window)) {
         float curr_frame = glfwGetTime();
         delta_time = curr_frame - last_frame;
@@ -87,14 +83,11 @@ int main(int argc, char **argv) {
         mat4 projection;
         glm_mat4_identity(projection);
         glm_mat4_identity(camera->view);
-
-        glm_perspective(glm_rad(camera->fov), (ctx->height / ctx->width), 0.1f, 100.0f, projection); // 0.1f near plane , 100f far plane
-
-        /* Camera */
+        glm_perspective(glm_rad(camera->fov), (ctx->height / ctx->width), 0.1f, 100.0f, projection);
         view_matrix(camera);
 
-        render_shader(&r);
-
+        /************************** 3D Cube ************************************/
+        render_shader(r.shader);
         int projection_loc = glGetUniformLocation(r.shader, "projection");
         glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float *)projection);
 
@@ -103,10 +96,6 @@ int main(int argc, char **argv) {
 
         int model_loc = glGetUniformLocation(r.shader, "model");
 
-        /* Single Cube 
-		   *  Obviously 3D
-		   *  Minimizing by rendering a single cube to limit my FPS
-        */ 
         vec3 axis = {1.0f, 0.3f, 0.5f};
         vec3 cube_position = {0.0f, 0.0f, -5.0f};
         float angle = glm_rad(90.0f) * glfwGetTime();  // Speed of rotation
@@ -118,7 +107,7 @@ int main(int argc, char **argv) {
         glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)cube);
         render_cube(&r);
 
-        /* 2D Triangle */
+        /************************** 2D Triangle ********************************/
         mat4 triangle;
         vec3 pos = {0.0f, 0.0f, -3.0f};
         glm_mat4_identity(triangle);
@@ -127,10 +116,9 @@ int main(int argc, char **argv) {
         glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)triangle);
         render_triangle(&r);
 
-        /* Model */
-        #if 1
-        render_shader_dynamic(model->shader);
-        vec3 obj_pos = {0.0f, 0.0f, -7.0f};
+        /***************************** Model ***********************************/
+        render_shader(model->shader);
+        vec3 obj_pos = {0.0f, 0.0f, -10.0f};
         mat4 model_cube;
         glm_mat4_identity(model_cube);
         glm_translate(model_cube, obj_pos);
@@ -143,9 +131,8 @@ int main(int argc, char **argv) {
 
         model_loc = glGetUniformLocation(model->shader, "model");
         glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)model_cube);
-
         render_model(model);
-        #endif
+        /***********************************************************************/
         
         poll_events();
         swap_buffers(ctx->window);

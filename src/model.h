@@ -54,15 +54,15 @@ typedef struct {
 } OBJVertex;
 
 typedef struct {
-    size_t capacity; // 0
-    size_t size; // 8
-    unsigned int *data; // 12
+    size_t capacity;
+    size_t size;
+    unsigned int *data;
 } IndexBuffer;
 
 typedef struct {
-    size_t capacity; // 0
-    size_t size; // 16
-    OBJVertex *data; // 24
+    size_t capacity;
+    size_t size;
+    OBJVertex *data;
 } VertexBuffer;
 
 typedef struct {
@@ -89,12 +89,12 @@ typedef struct {
 } MTLLib;
 
 typedef struct {
-    unsigned int shader; // 0
-    unsigned int vao; // 4
-    unsigned int vbo; // 8
-    unsigned int ebo; // 12 
-    IndexBuffer *indices; // 24
-    VertexBuffer *vertices; // 36
+    unsigned int shader;
+    unsigned int vao;
+    unsigned int vbo;
+    unsigned int ebo;
+    IndexBuffer *indices;
+    VertexBuffer *vertices;
 } Mesh;
 
 Mesh* import_model(const char *file);
@@ -103,14 +103,14 @@ Mesh* MeshAlloc();
 VertexBuffer* init_vertices();
 IndexBuffer* init_indices();
 FaceElements init_faces();
-Vector3List      init_vec3_list();
-Vector2List      init_vec2_list();
+Vector3List init_vec3_list();
+Vector2List init_vec2_list();
 String* init_string();
 String* usplit(char *line, const char *delim);
 void append_string(String *s, char *item);
 Vector2 create_vec2(float x, float y);
 Vector3 create_vec3(float x, float y, float z);
-OBJVertex create_vertex(Vector3 pos, Vector2 uv);
+OBJVertex create_obj_vertex(Vector3 pos, Vector2 uv, Vector3 vn);
 bool is_in_vbo(VertexBuffer *vbo, OBJVertex *data);
 void split(char **array, char *line, const char *delim);
 void model_free(Mesh *mesh);

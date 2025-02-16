@@ -68,24 +68,23 @@ void render_init_model(Mesh *mesh) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(OBJVertex) * mesh->vertices->size, mesh->vertices->data, GL_STATIC_DRAW);
-    
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * mesh->indices->size, mesh->indices->data, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(OBJVertex), (void *)offsetof(OBJVertex, v));
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(OBJVertex), (void *)offsetof(OBJVertex, vt));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(OBJVertex), (void *)offsetof(OBJVertex, vt));
     glEnableVertexAttribArray(1);
 
-    free_data(mesh->vertices->data);
-    free_data(mesh->indices->data);
+    z_free_data(mesh->vertices->data);
+    z_free_data(mesh->indices->data);
     
     puts("Finished init model.");
 }
 
 void render_init_shapes(Renderer *r) {
     Vertex triangle[] = {
-        {{-0.5f,  -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+        {{-0.5f,-0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
         {{0.5f, -0.5f, 0.0f},   {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
         {{0.0f, 0.5f, 0.0f},    {0.0f, 0.0f, 1.0f}, {0.5f, 0.0f}}
     };
@@ -145,7 +144,6 @@ void render_init_shapes(Renderer *r) {
 }
 
 void render_add_vertices(Renderer *r, Vertex *vertices, size_t v_count, int pos) {
-    r->shapes[pos].vertices_count = v_count;
     #if DEBUG
     for(size_t i = 0; i < v_count; ++i) {
         printf("{position: %f, %f, %f} \n",  vertices[i].pos[0],   vertices[i].pos[1],   vertices[i].pos[2]);
@@ -155,7 +153,8 @@ void render_add_vertices(Renderer *r, Vertex *vertices, size_t v_count, int pos)
     fprintf(stderr, "Vertices count: [%lld]\n", v_count);
     #endif
 
-    r->shapes[pos].vertices = (Vertex *) malloc(sizeof(Vertex) * r->shapes->vertices_count);
+    r->shapes[pos].vertices_count = v_count;
+    r->shapes[pos].vertices = malloc(sizeof(Vertex) * r->shapes[pos].vertices_count);
     if(!r->shapes[pos].vertices) {
         fprintf(stderr, "ERROR: failed to alloc mem for vertices");
         free(r->shapes[pos].vertices);
@@ -186,18 +185,16 @@ void render_add_vertices(Renderer *r, Vertex *vertices, size_t v_count, int pos)
     r->shapes[pos].vertices = NULL;
 }
 
-#if 1
 void render_model(Mesh *mesh) {
     // bind the textures here
     // glActiveTexture(GL_TEXTURE0);
     // glBindTexture(GL_TEXTURE_2D, r->texture_id);
     // glUniform1i(glGetUniformLocation(r->shader, "minecraft_grass"), 0);
-
+    
     glBindVertexArray(mesh->vao);
     glDrawElements(GL_TRIANGLES, mesh->indices->size, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
-#endif
 
 void render_cube(Renderer *r) {
     glActiveTexture(GL_TEXTURE0);
@@ -219,16 +216,9 @@ void render_triangle(Renderer *r) {
     glBindVertexArray(0);
 }
 
-void render_shader(Renderer *r) {
-    glUseProgram(r->shader);
+void render_shader(unsigned int shd) {
+    glUseProgram(shd);
 }
-
-#if 1
-// need this for later (shapes & models)
-void render_shader_dynamic(unsigned int shader) {
-    glUseProgram(shader);
-}
-#endif
 
 void render_free(Vertex *vertices) {
     free(vertices);
@@ -269,8 +259,8 @@ unsigned int generate_shader(const char *v, const char* f) {
     unsigned int shader_id;
     char *vertex_buffer, *fragment_buffer;
     size_t vbuff_size, fbuff_size;
-    read_file_t(&vertex_buffer, &vbuff_size, v);
-    read_file_t(&fragment_buffer, &fbuff_size, f);
+    z_read_file(&vertex_buffer, &vbuff_size, v);
+    z_read_file(&fragment_buffer, &fbuff_size, f);
 
     if(vbuff_size == 0 || fbuff_size == 0) {
         fprintf(stderr, "ERROR: Shader file size is 0!\n");

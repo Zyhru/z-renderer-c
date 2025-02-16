@@ -1,5 +1,14 @@
 #include "util.h"
 
+void z_print_vec3(Vector3 *data, int size) {
+    for(int i = 0; i < size; ++i) {
+        printf("{%f, %f, %f}\n", 
+               data[i].x, 
+               data[i].y,
+               data[i].z);
+    }
+}
+
 void* z_malloc(size_t size, const char *name) {
     void *ptr = malloc(size);
     if(!ptr) {
@@ -7,37 +16,11 @@ void* z_malloc(size_t size, const char *name) {
         return NULL;
     }
     
-    printf("Memory allocated: [%zu] bytes for [%s]\n", size, name);
+    //printf("Memory allocated: [%zu] bytes for [%s]\n", size, name);
     return ptr;
 }
 
-char* read_file(const char* path) {
-    FILE *fp = fopen(path, "rb");
-    if(!fp) {
-        fprintf(stderr, "ERROR: could not open file: [%s\n]", path);
-        return NULL;
-    }
-    
-    fseek(fp, 0, SEEK_END);
-    long file_size = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-
-    char *buffer = malloc(file_size + 1);
-    if(!buffer) {
-        fprintf(stderr, "ERROR: failed to alloc mem for buffer");
-        fclose(fp);
-        free(buffer);
-        return NULL;
-    }
-
-    fread(buffer, 1, file_size, fp);
-    fclose(fp);
-    buffer[file_size] = '\0';
-
-    return buffer;
-}
-
-void read_file_t(char** buffer, size_t *buffer_size, const char *path) {
+void z_read_file(char** buffer, size_t *buffer_size, const char *path) {
     FILE *fp = fopen(path, "rb");
     if(!fp) {
         fprintf(stderr, "ERROR: Incorrect path: %s\n", path);
@@ -61,7 +44,7 @@ void read_file_t(char** buffer, size_t *buffer_size, const char *path) {
     fclose(fp);
 }
 
-void free_data(void *data) {
+void z_free_data(void *data) {
     if(data) {
         puts("Freeing data");
         free(data);
