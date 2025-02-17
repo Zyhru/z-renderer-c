@@ -16,8 +16,6 @@ Camera* camera_init(Context *ctx, float fov) {
     camera->x = -(ctx->width / 2);
     camera->y = -(ctx->height / 2);
 
-    printf("Initial X,Y: (%f, %f)\n", camera->x, camera->y);
-    
     camera->pos[0] = 0.0f; // x
     camera->pos[1] = 0.0f; // y
     camera->pos[2] = 0.0f; // z

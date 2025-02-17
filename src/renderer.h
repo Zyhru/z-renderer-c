@@ -64,7 +64,7 @@ void render_triangle(Renderer *r);
 void render_model(Mesh *mesh);
 
 /* shader funcs */
-unsigned int generate_shader(const char *v, const char *f);
+unsigned int generate_shader_id(const char *v, const char *f);
 
 /* texture funcs */
 Texture load_image(const char *file_name);

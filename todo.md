@@ -1,22 +1,24 @@
 # TODOs for Renderer Project
 
 ## Bugs
-- [ ] Parse .obj file with faces for no slash
-- [ ] Parse .obj file with faces for single slashes
-- [ ] Parse .obj file with faces for double slashes
+- [x] Parse .obj file with faces for no slash
+- [x] Parse .obj file with faces for single slashes
+- [ ] Parse .obj file with faces for double slashes (not doing this)
+- [ ] Implement a way to grab relative paths instead of hard coding paths
 
 ## General TODO
 - [x] Implement camera movement (left, right, forward, backward)  
 - [x] Implement camera look-around using mouse input  
 - [x] Add texture support  
 - [x] Refactor shader creation to be dynamic  
-- [ ] Detect file line endings (Unix: LF `\n`, Windows: CRLF `\r\n`)  
 - [ ] Complete 3D Model Loading (.obj)  
   - [ ] Handle more advanced features (e.g., multiple meshes)  
   - [ ] Support textures and materials in .obj parsing  
 - [ ] Create a custom color struct for easier window color changes  
 - [ ] Implement font rendering (e.g., display FPS)  
-- [ ] Add a macro for `init_T_list`  
+- [x] Add a macro for `init_T_list`  
+- [ ] Add ImGui
+- [ ] Test cross-platform building for Linux 
 
 ---
 
@@ -25,10 +27,10 @@
 - [x] Parse vertices (`v`)  
 - [x] Parse textures (`vt`)  
 - [x] Parse normals (`vn`) (defer lighting implementation for now)  
-- [ ] Handle faces with slashes (e.g., `f v/vt/vn`)  
+- [x] Handle faces with slashes (e.g., `f v/vt/vn`)  
 - [ ] Support textures and materials when parsing (`.mtl`)  
 - [ ] Handle duplicate vertices within VBO  
-- [ ] Test parser with more complex models (e.g., `gravestone.obj`)  
+- [x] Test parser with more complex models (e.g., `gravestone.obj`)  
 
 ### Textures
 - [x] Load texture images using `stb_image.h`  

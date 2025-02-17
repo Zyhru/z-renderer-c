@@ -11,6 +11,9 @@
 #define VERTEX_SIZE 4
 #define TEXTURE_SIZE 3
 
+#define REGULAR_TRIANGULATION 4
+#define QUAD_TRIANGULATION 5
+
 #define z_append_ptr(l, i)\
     do {\
         if(l->size >= l->capacity) {\
@@ -40,6 +43,13 @@
         }\
         l.data[l.size++] = i;\
     } while(0)\
+
+typedef enum {
+    INITIAL,
+    NO_SLASH,
+    SINGLE_SLASH,
+    DOUBLE_SLASH
+} SlashTypes_E;
 
 typedef struct {
     size_t cap;
@@ -98,20 +108,22 @@ typedef struct {
 } Mesh;
 
 Mesh* import_model(const char *file);
-Mesh* import_model_test(const char *file);
 Mesh* MeshAlloc();
+
 VertexBuffer* init_vertices();
 IndexBuffer* init_indices();
 FaceElements init_faces();
+
 Vector3List init_vec3_list();
 Vector2List init_vec2_list();
 String* init_string();
 String* usplit(char *line, const char *delim);
-void append_string(String *s, char *item);
+
 Vector2 create_vec2(float x, float y);
 Vector3 create_vec3(float x, float y, float z);
 OBJVertex create_obj_vertex(Vector3 pos, Vector2 uv, Vector3 vn);
-bool is_in_vbo(VertexBuffer *vbo, OBJVertex *data);
+
 void split(char **array, char *line, const char *delim);
 void model_free(Mesh *mesh);
 void read_mtl_file(MTLLib *mat);
+void append_string(String *s, char *item);

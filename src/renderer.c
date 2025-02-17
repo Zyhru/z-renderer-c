@@ -1,18 +1,14 @@
 #include "renderer.h"
+#include "util.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../include/stb_image.h"
 
-Paths path = {
-    .vertex_path =
-        "C:\\Users\\zyhru\\graphics\\shaders\\vertex.vert",
-    .fragment_path = "C:\\Users\\zyhru\\graphics\\shaders\\fragment.frag",
-    .texture =  {
-        "C:\\Users\\zyhru\\graphics\\assets\\minecraft_grass.jpg",
-        "C:\\Users\\zyhru\\graphics\\assets\\wall.jpg",
-        "C:\\Users\\zyhru\\graphics\\assets\\penger\\penger.png",
-    }
-};
+/* global vars for pathing */
+static char vertex_shd_path[STATUS_LOG_SIZE];
+static char fragment_shd_path[STATUS_LOG_SIZE];
+static char model_vertex_shd_path[STATUS_LOG_SIZE];
+static char model_fragment_shd_path[STATUS_LOG_SIZE];
 
 void clear_color() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -20,6 +16,12 @@ void clear_color() {
 }
 
 void render_init(Renderer *r) {
+    char texture_path[STATUS_LOG_SIZE];
+    
+    z_get_abs_path(vertex_shd_path, sizeof(vertex_shd_path), "shaders\\vertex.vert");
+    z_get_abs_path(fragment_shd_path, sizeof(fragment_shd_path), "shaders\\fragment.frag");
+    z_get_abs_path(texture_path, sizeof(texture_path), "assets\\wall.jpg");
+
     Primitive shapes[] = {
         {
             .vertices = NULL,
@@ -36,8 +38,7 @@ void render_init(Renderer *r) {
     };
     
     memcpy(r->shapes, shapes, sizeof(shapes));
-
-    r->shader = generate_shader(path.vertex_path, path.fragment_path);
+    r->shader = generate_shader_id(vertex_shd_path, fragment_shd_path);
 
     puts("Initialing textures.");
     glGenTextures(1, &r->texture_id);
@@ -48,7 +49,7 @@ void render_init(Renderer *r) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    Texture texture = load_image(path.texture[0]);
+    Texture texture = load_image(texture_path);
     glTexImage2D(GL_TEXTURE_2D, 0, texture.format, texture.x, texture.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.image_data);
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(texture.image_data);
@@ -57,7 +58,9 @@ void render_init(Renderer *r) {
 
 void render_init_model(Mesh *mesh) {
     puts("Initializing model.");
-    mesh->shader = generate_shader("C:\\Users\\zyhru\\graphics\\shaders\\modelvert.vert", "C:\\Users\\zyhru\\graphics\\shaders\\modelfrag.frag");
+    z_get_abs_path(model_vertex_shd_path, sizeof(model_vertex_shd_path), "shaders\\modelvert.vert");
+    z_get_abs_path(model_fragment_shd_path, sizeof(model_fragment_shd_path), "shaders\\modelfrag.frag");
+    mesh->shader = generate_shader_id(model_vertex_shd_path, model_fragment_shd_path);
 
     glGenVertexArrays(1, &mesh->vao);
     glGenBuffers(1, &mesh->vbo);
@@ -253,7 +256,7 @@ Texture load_image(const char *file_name) {
     return texture;
 }
 
-unsigned int generate_shader(const char *v, const char* f) {
+unsigned int generate_shader_id(const char *v, const char* f) {
     printf("Reading shader files: [%s] | [%s]\n", v, f);
 
     unsigned int shader_id;
@@ -281,7 +284,7 @@ unsigned int generate_shader(const char *v, const char* f) {
         exit(EXIT_FAILURE);
     }
 
-    puts("Compiling fragments shader.");
+    puts("Compiling fragment shader.");
     unsigned int fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment_shader, 1, (char const * const *)&fragment_buffer, NULL);
     glCompileShader(fragment_shader);
