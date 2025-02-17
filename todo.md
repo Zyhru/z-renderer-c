@@ -4,7 +4,7 @@
 - [x] Parse .obj file with faces for no slash
 - [x] Parse .obj file with faces for single slashes
 - [ ] Parse .obj file with faces for double slashes (not doing this)
-- [ ] Implement a way to grab relative paths instead of hard coding paths
+- [x] Implement a way to grab relative paths instead of hard coding paths
 
 ## General TODO
 - [x] Implement camera movement (left, right, forward, backward)  
@@ -19,6 +19,7 @@
 - [x] Add a macro for `init_T_list`  
 - [ ] Add ImGui
 - [ ] Test cross-platform building for Linux 
+- [ ] Improved logging system with colors, time, function name, and line
 
 ---
 
