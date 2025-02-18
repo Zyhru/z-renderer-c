@@ -12,8 +12,9 @@ if NOT EXIST "%BUILD_DIR%" (
 REM Building
 
 cd build
-cmake ..
-cmake --build .
+cmake -DCMAKE_TOOLCHAIN_FILE=..\toolchain\toolchain-mingw.cmake -G "MinGW Makefiles" ..
+REM cmake --build .
+mingw32-make
 cd ..
 
-build\\Debug\\Z-Renderer.exe
+build\\Z-Renderer.exe

@@ -44,7 +44,6 @@ String* usplit(char *line, const char *delim) {
     char *context;
     char *token = strtok_s(line, delim, &context);
     int i = 0;
-
     // append each token to string list
     while(token != NULL) {
         append_string(sb, token);

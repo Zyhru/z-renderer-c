@@ -1,11 +1,18 @@
 # TODOs for Renderer Project
 
+## Cross-platform support
+- [ ] Fix up the cross-platform support for 
+    - MSVC
+    - MinGW
+    - Unix? 
+    - Fix MSVC bullship compiler warnings
+
 ## Logging
 - [ ] Add a verbose logging system
 - [ ] Add more logging information when rendering
 - [ ] Look at other projects with a logging system for inspiration
 
-## Bugs
+## .obj importer improvements 
 - [x] Fix parsing .obj file with faces for no slash
 - [x] Fix parsing .obj file with faces for single slashes
 - [ ] Fix parsing .obj file with faces for double slashes (not doing this right now) 
@@ -22,9 +29,11 @@
 - [ ] Create a custom color struct for easier window color changes  
 - [ ] Implement font rendering (e.g., display FPS)  
 - [x] Add a macro for `init_T_list`  
-- [ ] Add ImGui
+- [ ] Add ImGui -> (WORK ON THIS NEXT)
 - [ ] Test cross-platform building for Linux 
 - [x] Improved logging system with colors, time, function name, and line
+- [ ] Render a base floor e.g -> grass, water, or concrete, street 
+- [ ] Add gravity and collision
 ---
 
 ## Current Focus

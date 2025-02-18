@@ -1,16 +1,13 @@
-#include "renderer.h"
-
-#include "util.h"
 #include "window.h"
+#include "renderer.h"
+#include "util.h"
 #include "camera.h"
-#include <time.h>
 
 #define MAJOR 0
 #define MINOR 2
 #define PATCH 1
 
 #define TESTING 0
-
 
 static char penger_path[PATH_BUF_SIZE];
 static char ball_path[PATH_BUF_SIZE];
