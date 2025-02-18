@@ -283,7 +283,8 @@ bool is_in_vbo(VertexBuffer *vbo, OBJVertex *data) {
 
 // Supporting one mesh for now
 Mesh* import_model(const char *file) {
-    puts("Importing model.");
+    //puts("Importing model.");
+    ZLOG_INFO("%s: %s", "Importing model", file);
     // TODO: Fix absolute pathing, shit is ass [DONE]
     char prepend[LINE_BUF_SIZE] = "C:\\Users\\zyhru\\graphics\\assets\\penger\\"; // WARNING: Why do I need this?
     char* space_delim = " ";
@@ -312,7 +313,7 @@ Mesh* import_model(const char *file) {
         exit(EXIT_FAILURE);
     }
     
-    printf("Parsing model: %s\n", file);
+    //printf("Parsing model: %s\n", file);
     char line[LINE_BUF_SIZE];
     while(fgets(line, sizeof(line), fp) != NULL) {
         #if 0
@@ -498,7 +499,8 @@ Mesh* import_model(const char *file) {
     free(pos.data);
     free(norm.data);
     free(tex.data);
-    puts("Finished parsing model.");
+    //puts("Finished parsing model.");
+    ZLOG_INFO("%s: %s", "Successfully parsed model", file);
     return mesh;
 }
 

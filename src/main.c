@@ -3,6 +3,7 @@
 #include "util.h"
 #include "window.h"
 #include "camera.h"
+#include <time.h>
 
 #define MAJOR 0
 #define MINOR 2
@@ -24,7 +25,9 @@ void update(Context *ctx, Camera *camera, Input *input, float delta_time) {
 }
 
 int main(int argc, char **argv) {
-    printf("Project Name: Z-Renderer\nVERSION: %d.%d.%d\n", MAJOR, MINOR, PATCH);
+    //printf("Project Name: Z-Renderer\nVERSION: %d.%d.%d\n", MAJOR, MINOR, PATCH);
+    printf("\n\n");
+    ZLOG_INFO("Loading Z-Renderer: %d.%d.%d", MAJOR, MINOR, PATCH);
     float last_frame = 0.0f;
     float delta_time = 0.0f;
     Input input = {0};
@@ -32,27 +35,23 @@ int main(int argc, char **argv) {
     
     z_get_abs_path(penger_path, sizeof(penger_path), "assets\\penger\\penger.obj");
     z_get_abs_path(ball_path, sizeof(ball_path), "models\\ball.obj");
-    
-    //printf("Absolute path: %s\n", penger_path);
 
     Context *ctx = window_init();
     if(!ctx) {
-        ctx = NULL;
-        return 1;
+        exit(EXIT_FAILURE);
     }
+    ZLOG_INFO("%s", "Successfully initialized OpenGL context");
 
     Camera *camera = camera_init(ctx, 90.0f);
     if(!camera) {
-        camera = NULL;
-        return 1;
+        exit(EXIT_FAILURE);
     }
+    ZLOG_INFO("%s", "Successfully initialized the camera.");
 
     context_register_callbacks(ctx, &input);
 
-
     Mesh* penger_model = import_model(penger_path);
     Mesh* ball_model = import_model(ball_path);
-    // something like -> util.relative_path() + "assets\\penger\\penger.obj"
 
 #if TESTING
     printf("Mode: Testing\n");
@@ -71,8 +70,8 @@ int main(int argc, char **argv) {
     render_init(&r);
     render_init_shapes(&r);
     
-    render_init_model(penger_model);
-    render_init_model(ball_model);
+    render_init_model(penger_model, "penger");
+    render_init_model(ball_model, "ball");
     
     glEnable(GL_DEPTH_TEST);
     while(!should_close(ctx) && !window_closed(ctx->window)) {
@@ -158,6 +157,6 @@ int main(int argc, char **argv) {
     camera_free(camera);
     model_free(penger_model);
     model_free(ball_model);
-    puts("Shutting down renderer.");
+    ZLOG_INFO("%s", "Application closed successfully");
     return 0;
 }

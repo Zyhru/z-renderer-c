@@ -26,28 +26,34 @@ bool should_close(Context *ctx) {
 Context* window_init() {
     Context *ctx = (Context *)malloc(sizeof(Context));
     if(!ctx) {
-        free(ctx);
-        fprintf(stderr, "ERROR Failed to allocate memory for Context\n"); 
+        ZLOG_ERROR("%s", "Failed to allocate memory for OpenGL context.");
         return NULL;
     }
 
+    ZLOG_INFO("%s", "Initializing OpenGL context.");
     ctx->height = 1024;
     ctx->width  = 800;
     ctx->name   = "z-renderer";
     ctx->window_status = helper;
+    ctx->gl_ver_major = 3;
+    ctx->gl_ver_minor = 3;
 
     if(!glfwInit()) {
-        fprintf(stderr, "ERROR: failed to initialize GLFW\n");
+        //fprintf(stderr, "ERROR: failed to initialize GLFW\n");
+        ZLOG_ERROR("%s", "Failed to initialize GLFW.");
         return NULL;
     }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, ctx->gl_ver_major);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, ctx->gl_ver_minor);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); 
+    
+    ZLOG_INFO("Using OpenGL core v%d.%d", ctx->gl_ver_major, ctx->gl_ver_minor);
 
     ctx->window = glfwCreateWindow(ctx->height, ctx->width, ctx->name, NULL, NULL );
     if(!ctx->window) {
-        fprintf(stderr, "ERROR: failed to create window\n");
+        //fprintf(stderr, "ERROR: failed to create window\n");
+        ZLOG_ERROR("%s", "Failed to create GLFW window.");
         return NULL;
     }
 
@@ -58,7 +64,8 @@ Context* window_init() {
     glfwMakeContextCurrent(ctx->window);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        fprintf(stderr, "ERROR: failed to initialize glad\n");
+        ZLOG_ERROR("%s", "Failed to load OpenGL function pointers.");
+        //fprintf(stderr, "ERROR: failed to initialize glad\n");
         return NULL;
     }
     
@@ -72,7 +79,6 @@ void context_register_callbacks(Context *ctx, Input *input) {
 
 void window_update(Input *input) {
     if(input->keys[GLFW_KEY_ESCAPE]) {
-        puts("Closing renderer");
         helper = true;
     }
 }

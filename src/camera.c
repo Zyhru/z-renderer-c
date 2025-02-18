@@ -4,8 +4,7 @@
 Camera* camera_init(Context *ctx, float fov) {
     Camera *camera = (Camera *) malloc(sizeof(Camera));
     if(!camera) {
-        fprintf(stderr, "ERROR: failed to allocate mem for camera");
-        free(camera);
+        ZLOG_ERROR("%s", "Failed to allocate memory for the camera." );
         return NULL;
     }
     
@@ -27,6 +26,8 @@ Camera* camera_init(Context *ctx, float fov) {
     camera->front[0] = 0.0f;  // x 
     camera->front[1] = 0.0f;  // y
     camera->front[2] = -1.0f; // z
+    
+    //ZLOG_INFO("%s", "Camera settings: \nfov: %d\nstarting pos {%f, %f, %f}", camera->fov, camera->pos[0], camera->pos[1], camera->pos[2]);
     return camera;
 }
 

@@ -55,7 +55,7 @@ typedef struct {
 /* rendering funcs */
 void render_init(Renderer *r);
 void render_init_shapes(Renderer *r);
-void render_init_model(Mesh *mesh);
+void render_init_model(Mesh *mesh, char *name);
 void render_add_vertices(Renderer *r, Vertex *vertices, size_t v_count, int pos);
 void render_shader(unsigned int shd);
 void render_free(Vertex *vertices);

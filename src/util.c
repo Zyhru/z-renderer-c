@@ -1,5 +1,20 @@
 #include "util.h"
 
+void z_log_msg(const char *level, const char *file, int line, const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+
+    time_t t = time(NULL);
+    struct tm *tm_info = localtime(&t);
+    char time_str[20];
+    strftime(time_str, sizeof(time_str), "%H:%M:%S", tm_info);
+    
+    printf("[%s] [%s] %s:%d - ", time_str, level, file, line);
+    vprintf(fmt, args);
+    printf("\n");
+
+    va_end(args);
+}
 
 void z_print_vec3(Vector3 *data, int size) {
     for(int i = 0; i < size; ++i) {
@@ -85,9 +100,9 @@ void z_get_abs_path(char *buf, size_t len, char *x) {
         //perror();
     }
     
-    printf("%s\n", dir_buf);
-    printf("%s\n", x);
-    printf("%zu\n", len);
+    //printf("%s\n", dir_buf);
+    //printf("%s\n", x);
+    //printf("%zu\n", len);
     
     int offset = 0;
     offset += snprintf(buf + offset, len - offset, "%s", dir_buf);

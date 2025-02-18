@@ -16,8 +16,9 @@ void clear_color() {
 }
 
 void render_init(Renderer *r) {
+    ZLOG_INFO("%s", "Initializing Z-Renderer"); 
+
     char texture_path[STATUS_LOG_SIZE];
-    
     z_get_abs_path(vertex_shd_path, sizeof(vertex_shd_path), "shaders\\vertex.vert");
     z_get_abs_path(fragment_shd_path, sizeof(fragment_shd_path), "shaders\\fragment.frag");
     z_get_abs_path(texture_path, sizeof(texture_path), "assets\\wall.jpg");
@@ -40,7 +41,7 @@ void render_init(Renderer *r) {
     memcpy(r->shapes, shapes, sizeof(shapes));
     r->shader = generate_shader_id(vertex_shd_path, fragment_shd_path);
 
-    puts("Initialing textures.");
+    ZLOG_INFO("%s", "Initializing textures");
     glGenTextures(1, &r->texture_id);
     glBindTexture(GL_TEXTURE_2D, r->texture_id);
     
@@ -53,11 +54,11 @@ void render_init(Renderer *r) {
     glTexImage2D(GL_TEXTURE_2D, 0, texture.format, texture.x, texture.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.image_data);
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(texture.image_data);
-    puts("Finished textures.");
+    ZLOG_INFO("%s","Successfully loaded texture.");
 }
 
-void render_init_model(Mesh *mesh) {
-    puts("Initializing model.");
+void render_init_model(Mesh *mesh, char *name) {
+    ZLOG_INFO("Initializing model: %s", name);
     z_get_abs_path(model_vertex_shd_path, sizeof(model_vertex_shd_path), "shaders\\modelvert.vert");
     z_get_abs_path(model_fragment_shd_path, sizeof(model_fragment_shd_path), "shaders\\modelfrag.frag");
     mesh->shader = generate_shader_id(model_vertex_shd_path, model_fragment_shd_path);
@@ -82,10 +83,12 @@ void render_init_model(Mesh *mesh) {
     z_free_data(mesh->vertices->data);
     z_free_data(mesh->indices->data);
     
-    puts("Finished init model.");
+    ZLOG_INFO("Successfully imported model: %s", name);
+    
 }
 
 void render_init_shapes(Renderer *r) {
+    ZLOG_INFO("%s -> %s", "Initializing Z-Renderer's supported geometry", "2D Triangle, 3D Cube");
     Vertex triangle[] = {
         {{-0.5f,-0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
         {{0.5f, -0.5f, 0.0f},   {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
@@ -144,6 +147,7 @@ void render_init_shapes(Renderer *r) {
     
     render_add_vertices(r, cube, sizeof(cube) / sizeof(cube[0]), CUBE);
     render_add_vertices(r, triangle, sizeof(triangle) / sizeof(triangle[0]), TRIANGLE);
+    ZLOG_INFO("%s", "Successfully setup the supported geometry"); 
 }
 
 void render_add_vertices(Renderer *r, Vertex *vertices, size_t v_count, int pos) {
@@ -159,7 +163,7 @@ void render_add_vertices(Renderer *r, Vertex *vertices, size_t v_count, int pos)
     r->shapes[pos].vertices_count = v_count;
     r->shapes[pos].vertices = malloc(sizeof(Vertex) * r->shapes[pos].vertices_count);
     if(!r->shapes[pos].vertices) {
-        fprintf(stderr, "ERROR: failed to alloc mem for vertices");
+        ZLOG_ERROR("Failed to allocate memory for -> %d", pos); 
         free(r->shapes[pos].vertices);
         r->shapes[pos].vertices = NULL;
         return;
@@ -228,6 +232,7 @@ void render_free(Vertex *vertices) {
 }
 
 Texture load_image(const char *file_name) {
+    ZLOG_INFO("Loading texture: %s", file_name);
     Texture texture = {0};
     unsigned char *image_data = stbi_load(file_name, &texture.x, &texture.y, &texture.channels, STBI_rgb_alpha);
     if(!image_data)  {
@@ -238,13 +243,10 @@ Texture load_image(const char *file_name) {
 
     texture.image_data = image_data;
     if(texture.channels == 3) {
-        puts("Format: RGB");
         texture.format = GL_RGB;
     } else if(texture.channels == 4) {
-        puts("Format: RGBA");
         texture.format = GL_RGBA;
     } else if(texture.channels == 0) {
-        puts("Format: Greyscale");
         texture.format = GL_LUMINANCE;
     } else {
         fprintf(stderr, "ERROR: Invalid channel format\n");
@@ -252,12 +254,13 @@ Texture load_image(const char *file_name) {
         exit(EXIT_FAILURE);
     }
 
-    printf("Image Data: W: %d | H: %d\nFormat: %d\n", texture.x, texture.y, texture.format);
+    //printf("Image Data: W: %d | H: %d\nFormat: %d\n", texture.x, texture.y, texture.format);
+    //ZLOG_INFO("Successfully loaded texture.\nimage width: %d\nimage height: %d, image format: %s", texture.x, texture.y, texture.format);
     return texture;
 }
 
 unsigned int generate_shader_id(const char *v, const char* f) {
-    printf("Reading shader files: [%s] | [%s]\n", v, f);
+    //printf("Reading shader files: [%s] | [%s]\n", v, f);
 
     unsigned int shader_id;
     char *vertex_buffer, *fragment_buffer;
@@ -270,7 +273,7 @@ unsigned int generate_shader_id(const char *v, const char* f) {
         exit(EXIT_FAILURE);
     }
 
-    puts("Compiling vertex shader.");
+    ZLOG_INFO("Compiling vertex shader [%s]", v); 
     unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, (char const * const *)&vertex_buffer, NULL);
     glCompileShader(vertex_shader);
@@ -280,11 +283,11 @@ unsigned int generate_shader_id(const char *v, const char* f) {
     glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &status);
     if(!status) {
         glGetShaderInfoLog(vertex_shader, sizeof(status_log), NULL, status_log);
-        fprintf(stderr, "ERROR: Vertex Shader Compilation: %s\n", status_log);
+        ZLOG_ERROR("Vertex shader compilition error: %s", "status_log"); 
         exit(EXIT_FAILURE);
     }
 
-    puts("Compiling fragment shader.");
+    ZLOG_INFO("Compiling fragment shader [%s]", f); 
     unsigned int fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment_shader, 1, (char const * const *)&fragment_buffer, NULL);
     glCompileShader(fragment_shader);
@@ -292,10 +295,11 @@ unsigned int generate_shader_id(const char *v, const char* f) {
     glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &status);
     if(!status) {
         glGetShaderInfoLog(fragment_shader, sizeof(status_log), NULL, status_log);
-        fprintf(stderr, "ERROR: Fragment Shader Compilation: %s\n", status_log);
+        ZLOG_ERROR("Fragment shader compilition error: %s", "status_log"); 
         exit(EXIT_FAILURE);
     }
     
+    ZLOG_INFO("%s", "Linking shaders"); 
     shader_id = glCreateProgram();
     glAttachShader(shader_id, vertex_shader);
     glAttachShader(shader_id, fragment_shader);
@@ -304,12 +308,12 @@ unsigned int generate_shader_id(const char *v, const char* f) {
     glGetShaderiv(shader_id, GL_LINK_STATUS, &status);
     if(!status) {
         glGetShaderInfoLog(shader_id, sizeof(status_log), NULL, status_log);
-        fprintf(stderr, "ERROR: Shader could not link: %s\n", status_log);
+        ZLOG_ERROR("Linking shaders error: %s", "status_log"); 
         exit(EXIT_FAILURE);
     }
 
     free(vertex_buffer);
     free(fragment_buffer);
-    puts("Finished shaders.");
+    ZLOG_INFO("%s", "Successfully finished shaders"); 
     return shader_id;
 }

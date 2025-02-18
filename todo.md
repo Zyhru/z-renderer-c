@@ -1,10 +1,15 @@
 # TODOs for Renderer Project
 
+## Logging
+- [ ] Add a verbose logging system
+- [ ] Add more logging information when rendering
+- [ ] Look at other projects with a logging system for inspiration
+
 ## Bugs
-- [x] Parse .obj file with faces for no slash
-- [x] Parse .obj file with faces for single slashes
-- [ ] Parse .obj file with faces for double slashes (not doing this)
-- [x] Implement a way to grab relative paths instead of hard coding paths
+- [x] Fix parsing .obj file with faces for no slash
+- [x] Fix parsing .obj file with faces for single slashes
+- [ ] Fix parsing .obj file with faces for double slashes (not doing this right now) 
+- [x] Fix the logic of sending file paths to various functions 
 
 ## General TODO
 - [x] Implement camera movement (left, right, forward, backward)  
@@ -19,8 +24,7 @@
 - [x] Add a macro for `init_T_list`  
 - [ ] Add ImGui
 - [ ] Test cross-platform building for Linux 
-- [ ] Improved logging system with colors, time, function name, and line
-
+- [x] Improved logging system with colors, time, function name, and line
 ---
 
 ## Current Focus

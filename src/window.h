@@ -8,6 +8,7 @@
 #include <stdbool.h>
 
 #include "input.h"
+#include "util.h"
 
 typedef struct  {
     float width;
@@ -15,6 +16,8 @@ typedef struct  {
     const char *name;
     GLFWwindow *window;
     bool window_status;
+    int gl_ver_major;
+    int gl_ver_minor;
 } Context;
 
 Context* window_init();
