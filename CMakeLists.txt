@@ -42,6 +42,10 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glad)
 
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
 # Fetch GLFW (OpenGL windowing library)
 FetchContent_Declare(
   glfw
@@ -50,9 +54,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 # Fetch cglm (mathematics library for OpenGL)
 FetchContent_Declare(

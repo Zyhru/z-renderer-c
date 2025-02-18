@@ -2,7 +2,7 @@
 
 REM if build folder does not exist, create the folder
 
-set BUILD_DIR=/build
+set BUILD_DIR=build
 
 if NOT EXIST "%BUILD_DIR%" (
     echo "Creating build folder"
