@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.2)
 project(Z-Renderer)
 
 message(STATUS "v1: CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")

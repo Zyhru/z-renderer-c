@@ -1,0 +1,8 @@
+CompileFlags:
+  Add: [
+    "-IC:\\Users\\zyhru\\graphics\\build\\_deps\\glad-build\\include",
+    "-IC:\\Users\\zyhru\\graphics\\build\\_deps\\glfw-src\\include",
+    "-IC:\\Users\\zyhru\\graphics\\build\\_deps\\cglm-src\\include",
+    "-xc",
+    "-std=11"
+  ]

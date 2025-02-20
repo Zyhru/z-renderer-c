@@ -21,6 +21,7 @@
 #define RESET "\033[0m"
 
 #define PATH_BUF_SIZE 512
+#define NUM_OF_ASSETS 10
 
 #define ZMALLOC_ERROR(...) fprintf(stderr, name, __VA_ARGS__) // TODO: Deprecate macro 
 #define Warning(...) fprintf(stderr,  __VA_ARGS__) //TODO: Depcrecate  macro
@@ -28,6 +29,14 @@
 #define ZLOG_INFO(fmt, ...) z_log_msg(GREEN"INFO"RESET, __FILE__, __LINE__, fmt, __VA_ARGS__)
 #define ZLOG_WARN(fmt, ...) z_log_msg(YELLOW"WARN"RESET, __FILE__, __LINE__, fmt, __VA_ARGS__)
 #define ZLOG_ERROR(fmt, ...) z_log_msg(RED"ERROR"RESET, __FILE__, __LINE__, fmt, __VA_ARGS__)
+
+
+typedef struct {
+    char *name;
+    char *path;
+} asset_t;
+
+extern asset_t g_assets[];
 
 typedef struct {
     float x;
@@ -45,7 +54,7 @@ void    z_print_uint(unsigned int *data);
 void    z_read_file(char **buffer, size_t *buff_size, const char* path);
 void*   z_malloc(size_t size, const char *name);
 void    z_free_data(void *data);
-void    z_get_abs_path(char *buf, size_t len, char *x);
+char*   z_get_asset_path(char *name);
 void    z_concat(char *buf, char *dir_buf, char *x);
 void    z_log_msg(const char *level, const char *file, int line, const char *fmt, ...);
 

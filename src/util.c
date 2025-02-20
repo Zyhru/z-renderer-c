@@ -1,5 +1,43 @@
 #include "util.h"
 
+#if defined(OS_WINDOWS)
+    //ZLOG_INFO("%s", "Using Windows Pathing.");
+    asset_t g_assets[] = {
+        
+                /* Regular assets */
+        {"penger", "assets\\penger\\penger.obj"},
+        {"cube", "assets\\cube.obj"},
+        {"gravestone", "assets\\gravestone.obj"},
+        {"soccer_ball", "assets\\soccer_ball.obj"},
+        {"wall", "assets\\wall.jpg"},
+        {"minecraft_grass", "assets\\minecraft_grass.jpg"},
+
+                    /* Shaders */
+        {"vertex_shader", "shaders\\vertex.vert"},
+        {"fragment_shader", "shaders\\fragment.frag"},
+        {"modelvert_shader", "shaders\\modelvert.vert"},
+        {"modelfrag_shader", "shaders\\modelfrag.frag"},
+
+    };
+
+#elif defined(OS_LINUX)
+    asset_t g_assets[] = {
+        /* Regular assets */
+        "penger", "assets/penger/penger.obj",
+        "cube", "assets/cube.obj",
+        "gravestone", "assets/gravestone.obj",
+        "soccer_ball", "assets/soccer_ball.obj",
+        "wall", "assets/wall.jpg",
+        "minecraft_grass", "assets/minecraft_grass.jpg",
+
+        /* Shaders */
+        "vertex_shader", "shaders/vertex.vert",
+        "fragment_shader", "shaders/fragment.vert",
+        "modelvert_shader", "shaders/modelvert.vert",
+        "modelfrag_shader", "shaders/modelfrag.frag"
+    };
+#endif
+    
 void z_log_msg(const char *level, const char *file, int line, const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
@@ -83,7 +121,34 @@ void z_free_data(void *data) {
     *
     */
 
-void z_get_abs_path(char *buf, size_t len, char *x) {
+char* z_get_asset_path(char* name) {
+    char *buffer = NULL; 
+    for(int i = 0; i < NUM_OF_ASSETS; ++i) {
+        asset_t asset = g_assets[i];
+
+        /* found a match */
+        if(strcmp(name, asset.name) == 0) {
+            buffer = asset.path;
+            break;
+        }
+    }
+    
+    if(buffer == NULL) {
+        ZLOG_ERROR("Failed to locate asset: %s", name);
+        exit(EXIT_FAILURE);
+    }
+
+    ZLOG_INFO("Asset [%s] path -> %s", name, buffer);
+    return buffer;
+    
+    #if 0
+    char *os_slash;
+    #if defined(OS_LINUX)
+        os_slash = "/";
+    #elif defined(OS_WINDOWS)
+        os_slash = "//";
+    #endif
+
     char dir_buf[50];
     char *res;
 
@@ -106,22 +171,7 @@ void z_get_abs_path(char *buf, size_t len, char *x) {
     
     int offset = 0;
     offset += snprintf(buf + offset, len - offset, "%s", dir_buf);
-    offset += snprintf(buf + offset, len - offset, "%s", "\\");
+    offset += snprintf(buf + offset, len - offset, "%s", os_slash);
     offset += snprintf(buf + offset, len - offset, "%s", x);
+    #endif
 }
-
-#if 0
-void z_concat(char *buf, char *dir_buf, char *msg) {
-    printf("CWD Path: %s\n", dir_buf);
-    printf("Rest of path %s\n", msg);
-
-    char *win_slash = "\\";
-    strcat_s(buf, sizeof(buf), dir_buf);
-    strcat_s(buf, sizeof(buf), win_slash);
-    strcat_s(buf, sizeof(buf), msg);
-
-
-    //snprintf(buf, sizeof(buf), "%s%s", dir_buf, msg);
-
-}
-#endif

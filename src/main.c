@@ -9,8 +9,9 @@
 
 #define TESTING 0
 
-static char penger_path[PATH_BUF_SIZE];
-static char ball_path[PATH_BUF_SIZE];
+//static char penger_path[PATH_BUF_SIZE];
+//static char ball_path[PATH_BUF_SIZE];
+
 
 void update(Context *ctx, Camera *camera, Input *input, float delta_time) {
     double xpos, ypos;
@@ -21,17 +22,18 @@ void update(Context *ctx, Camera *camera, Input *input, float delta_time) {
     window_update(input);
 }
 
+// TODO: handle passing in file paths that supports Linux
 int main(int argc, char **argv) {
-    //printf("Project Name: Z-Renderer\nVERSION: %d.%d.%d\n", MAJOR, MINOR, PATCH);
     printf("\n\n");
     ZLOG_INFO("Loading Z-Renderer: %d.%d.%d", MAJOR, MINOR, PATCH);
+   
     float last_frame = 0.0f;
     float delta_time = 0.0f;
+    
     Input input = {0};
     Renderer r;
-    
-    z_get_abs_path(penger_path, sizeof(penger_path), "assets\\penger\\penger.obj");
-    z_get_abs_path(ball_path, sizeof(ball_path), "models\\ball.obj");
+    char *penger_path = z_get_asset_path("penger");
+    char *ball_path = z_get_asset_path("soccer_ball");
 
     Context *ctx = window_init();
     if(!ctx) {

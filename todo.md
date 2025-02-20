@@ -6,6 +6,9 @@
     - MinGW
     - Unix? 
     - Fix MSVC bullship compiler warnings
+    - Cleanup toolchain .cmake and remove GCC_EXECUTABLE logic
+    - Cleanup CMakeLists.txt for proper cross-platform support.. I think? 
+- [ ] Setup a system on whether to use / or \\ depending on the OS, so that we can load textures/shaders successfully based on the users system
 
 ## Logging
 - [ ] Add a verbose logging system

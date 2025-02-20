@@ -5,10 +5,13 @@
 #include "../include/stb_image.h"
 
 /* global vars for pathing */
+#if 0
 static char vertex_shd_path[STATUS_LOG_SIZE];
 static char fragment_shd_path[STATUS_LOG_SIZE];
 static char model_vertex_shd_path[STATUS_LOG_SIZE];
 static char model_fragment_shd_path[STATUS_LOG_SIZE];
+#endif
+
 
 void clear_color() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -18,10 +21,13 @@ void clear_color() {
 void render_init(Renderer *r) {
     ZLOG_INFO("%s", "Initializing Z-Renderer"); 
 
-    char texture_path[STATUS_LOG_SIZE];
-    z_get_abs_path(vertex_shd_path, sizeof(vertex_shd_path), "shaders\\vertex.vert");
-    z_get_abs_path(fragment_shd_path, sizeof(fragment_shd_path), "shaders\\fragment.frag");
-    z_get_abs_path(texture_path, sizeof(texture_path), "assets\\wall.jpg");
+    char *texture_path = z_get_asset_path("wall");
+    char *vertex_shd_path = z_get_asset_path("vertex_shader");
+    char *fragment_shd_path = z_get_asset_path("fragment_shader");
+
+    //z_get_abs_path(vertex_shd_path, sizeof(vertex_shd_path), "shaders\\vertex.vert");
+    //z_get_abs_path(fragment_shd_path, sizeof(fragment_shd_path), "shaders\\fragment.frag");
+    //z_get_abs_path(texture_path, sizeof(texture_path), "assets\\wall.jpg");
 
     Primitive shapes[] = {
         {
@@ -59,8 +65,10 @@ void render_init(Renderer *r) {
 
 void render_init_model(Mesh *mesh, char *name) {
     ZLOG_INFO("Initializing model: %s", name);
-    z_get_abs_path(model_vertex_shd_path, sizeof(model_vertex_shd_path), "shaders\\modelvert.vert");
-    z_get_abs_path(model_fragment_shd_path, sizeof(model_fragment_shd_path), "shaders\\modelfrag.frag");
+    char *model_vertex_shd_path = z_get_asset_path("modelvert_shader");
+    char *model_fragment_shd_path = z_get_asset_path("modelfrag_shader");
+    //z_get_abs_path(model_vertex_shd_path, sizeof(model_vertex_shd_path), "shaders\\modelvert.vert");
+    //z_get_abs_path(model_fragment_shd_path, sizeof(model_fragment_shd_path), "shaders\\modelfrag.frag");
     mesh->shader = generate_shader_id(model_vertex_shd_path, model_fragment_shd_path);
 
     glGenVertexArrays(1, &mesh->vao);
