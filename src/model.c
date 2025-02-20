@@ -41,13 +41,13 @@ static void parse_double_slash() {
 
 String* usplit(char *line, const char *delim) {
     String *sb = init_string();
-    char *context;
-    char *token = strtok_s(line, delim, &context);
+    char *token = strtok(line, delim);
     int i = 0;
+
     // append each token to string list
     while(token != NULL) {
         append_string(sb, token);
-        token = strtok_s(NULL, delim, &context);
+        token = strtok(NULL, delim);
         ++i;
     }
     

@@ -32,7 +32,7 @@
 
         /* Shaders */
         "vertex_shader", "shaders/vertex.vert",
-        "fragment_shader", "shaders/fragment.vert",
+        "fragment_shader", "shaders/fragment.frag",
         "modelvert_shader", "shaders/modelvert.vert",
         "modelfrag_shader", "shaders/modelfrag.frag"
     };
